@@ -1,0 +1,18 @@
+.container {
+    width: 100vw;
+    height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.left {
+    display: flex;
+    flex-direction: column;
+}
+
+.camera_container {
+    width: 660px;
+    height: 500px;
+}
