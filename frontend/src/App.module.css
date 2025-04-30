@@ -15,4 +15,15 @@
 .camera_container {
     width: 660px;
     height: 500px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border: 3px solid gray;
+    border-radius: 10px;
+}
+
+.camera {
+    border-radius: 10px;
 }
