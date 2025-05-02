@@ -1,24 +1,34 @@
 import websockets
 import asyncio
 import json
-
 from camera import Camera
+from plc_controller import PlcController
 
 
 class WebsocketServer:
     def __init__(self):
         self.camera = Camera()
+        self.plc_controller = PlcController()
 
     async def handle_message(self, websocket, message):
         # 문자열로 된 JSON 데이터를 사전처럼 사용
         data = json.loads(message)
         command_type = data['type']
         command_action = data['action']
+        command_data = data.get('data')
 
         if command_type == 'camera' and command_action == 'start':
             if self.camera.initialize():
                 # asyncio 라이브러리에서 비동기 코드를 동시적으로 실행하기 위해 사용
                 asyncio.create_task(self.camera.streaming(websocket))
+
+        elif command_type == 'shoot':
+            if command_action == 'manual':
+                mode = command_data['mode']
+                x = command_data['x']
+                y = command_data['y']
+
+                self.plc_controller.manual_shoot(mode, x, y)
 
     async def handle_connection(self, websocket):
         print('클라이언트 연결 성공')

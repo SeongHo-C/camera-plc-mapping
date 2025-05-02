@@ -1,12 +1,27 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './App.module.css'
 
 export default function App() {
   const [frame, setFrame] = useState('');
+  const [ws, setWs] = useState(null);
+
+  const modeSelectRef = useRef(null)
+  const xInputRef = useRef(null)
+  const yInputRef = useRef(null)
+
+  const handleManualShoot = () => {
+    const mode = modeSelectRef.current.value;
+    const x = xInputRef.current.value;
+    const y = yInputRef.current.value;
+
+    ws.send(JSON.stringify({ type: 'shoot', action: 'manual', data: {mode, x, y}}))
+  }
 
   useEffect(() => {
     const socket = new WebSocket('ws://localhost:8765');
     socket.binaryType = 'arraybuffer';
+    setWs(socket)
+
     let prevUrl = null;
 
     socket.onmessage = async (e) => {
@@ -39,11 +54,21 @@ export default function App() {
       <div className={styles.left}>
         <span>FPS: </span>
         <div className={styles.camera_container}>
-          <img className={styles.camera} src={frame} alt='realtime-video' />
+          {frame && <img className={styles.camera} src={frame} alt='realtime-video' />}
         </div>
       </div>
       <div className={styles.right}>
-        right
+        <div className={styles.manual}>
+          <select ref={modeSelectRef} className={styles.manual_mode}>
+            <option value='PLC'>PLC</option>
+            <option value='Pixel'>Pixel 👉 PLC</option>
+          </select>
+          <div>
+            <input ref={xInputRef} type="number" />
+            <input ref={yInputRef} type="number" />
+            <button onClick={handleManualShoot}>수동</button>
+          </div>
+        </div>
       </div>
     </main>
   );
