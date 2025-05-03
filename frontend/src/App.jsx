@@ -58,6 +58,32 @@ export default function App() {
         </div>
       </div>
       <div className={styles.right}>
+        <div className={styles.target_container}>
+          <span className={styles.title}>표적지</span>
+          <div className={styles.target}>
+            <div className={styles.LT}>
+              <input className={styles.target_input} type="number" />
+              <input className={styles.target_input} type="number" />
+            </div>
+            <div className={styles.RT}>
+              <input className={styles.target_input} type="number" />
+              <input className={styles.target_input} type="number" />
+            </div>
+            <div className={styles.LB}>
+              <input className={styles.target_input} type="number" />
+              <input className={styles.target_input} type="number" />
+            </div>
+            <div className={styles.RB}>
+              <input className={styles.target_input} type="number" />
+              <input className={styles.target_input} type="number" />
+            </div>
+            <div className={styles.dot} />
+            <div className={styles.center}>
+              <input className={styles.target_input} type="number" />
+              <input className={styles.target_input} type="number" />
+            </div>
+          </div>
+        </div>
         <div className={styles.manual}>
           <select ref={modeSelectRef} className={styles.manual_mode}>
             <option value='PLC'>PLC</option>

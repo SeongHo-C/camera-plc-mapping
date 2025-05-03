@@ -35,50 +35,142 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: space-between;
+
 }
 
-.manual {
+.target_container > .title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.target {
+    width: 400px;
+    height: 250px;
+
     display: flex;
-    flex-direction: column;
-}
-
-.manual_mode {
-    width: calc(16rem + 10px);
-    height: 1.5rem;
-
-    padding: 0 5px;
-}
-
-
-.manual div {
-    display: flex;
+    justify-content: center;
     align-items: center;
 
-    gap: 10px;
+    border: 2px solid gray;
+    position: relative;
+    margin-top: 10px;
 }
 
-.manual > div input {
-    width: 8rem;
+.LT {
+    display: flex;
+    flex-direction: column;
+
+    position: absolute;
+    gap: 5px;
+    top: 5px;
+    left: 5px;
+}
+
+.RT {
+    display: flex;
+    flex-direction: column;
+
+    position: absolute;
+    gap: 5px;
+    left: calc(400px - 5.5rem - 10px);
+    top: 5px;
+}
+
+.LB {
+    display: flex;
+    flex-direction: column;
+
+    position: absolute;
+    gap: 5px;
+    top: calc(250px - 4rem - 15px);
+    left: 5px;
+}
+
+.RB {
+    display: flex;
+    flex-direction: column;
+
+    position: absolute;
+    gap: 5px;
+    left: calc(400px - 5.5rem - 10px);
+    top:calc(250px - 4rem - 15px)
+}
+
+.center {
+    display: flex;
+
+    margin-top: 4rem;
+    gap: 5px
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+
+    position: absolute;
+    background-color: red;
+    border-radius: 50%;
+}
+
+.target_input {
+    width: 5.5rem;
     height: 2rem;
 
     padding: 5px 10px;
     border: 2px solid gray;
     border-radius: 10px;
+    font-size: 18px;
+    text-align: center;
+}
+
+.manual {
+    width: 400px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.manual_mode {
+    width: calc(16rem + 20px);
+    height: 2rem;
+
+    padding: 0 5px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.manual div {
+    display: flex;
+    align-items: center;
+    
+    gap: 20px;
+}
+
+.manual > div input {
+    width: 8rem;
+    height: 2.5rem;
+
+    padding: 5px 10px;
+    border: 2px solid gray;
+    border-radius: 10px;
+    font-size: 18px;
 }
 
 .manual > div button {
-    width: 4rem;
-    height: 4rem;
-
+    width: 5rem;
+    height: 5rem;
+    
     background-color: blue;
     color: white;
     border: none;
     border-radius: 50%;
-    margin-left: 10px;
-    font-size: 16px;
+    margin-left: 20px;
+    font-size: 18px;
     font-weight: bold;
 }
 
 .manual > div button:hover {
     background-color: red;
 }
+
