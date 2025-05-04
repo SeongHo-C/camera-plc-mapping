@@ -10,6 +10,14 @@
 .left {
     display: flex;
     flex-direction: column;
+
+    height: 550px;
+}
+
+.fps {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
 }
 
 .camera_container {

@@ -3,11 +3,15 @@ import styles from './App.module.css'
 
 export default function App() {
   const [frame, setFrame] = useState('');
+  const [fps, setFps] = useState(0);
   const [ws, setWs] = useState(null);
 
   const modeSelectRef = useRef(null)
   const xInputRef = useRef(null)
   const yInputRef = useRef(null)
+
+  const frameTimesRef = useRef([]);
+  const lastFpsUpdateRef = useRef(0);
 
   const handleManualShoot = () => {
     const mode = modeSelectRef.current.value;
@@ -31,9 +35,20 @@ export default function App() {
       if (prevUrl) {
         URL.revokeObjectURL(prevUrl);
       }
-      prevUrl = url;
 
+      prevUrl = url;
       setFrame(url);
+
+      // 고해상도 시간 측정(성능 측정에 적합)
+      const now = performance.now();
+
+      frameTimesRef.current = frameTimesRef.current.filter(t => now - t < 1000);
+      frameTimesRef.current.push(now);
+
+      if (now - lastFpsUpdateRef.current > 200) {
+        setFps(frameTimesRef.current.length);
+        lastFpsUpdateRef.current = now;
+      }
     }
 
     socket.onopen = () => {
@@ -52,7 +67,9 @@ export default function App() {
   return (
     <main className={styles.container}>
       <div className={styles.left}>
-        <span>FPS: </span>
+        <div className={styles.fps}>
+          <span>FPS: {fps}</span>
+        </div>
         <div className={styles.camera_container}>
           {frame && <img className={styles.camera} src={frame} alt='realtime-video' />}
         </div>
