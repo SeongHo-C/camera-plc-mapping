@@ -83,17 +83,28 @@ export default function App() {
               <input className={styles.target_input} type="number" />
             </div>
           </div>
+          <div className={styles.range}>
+            <div>
+              <span>상하:</span>
+              <input className={styles.target_input} type="number" />
+              <span>좌우:</span>
+              <input className={styles.target_input} type="number" />
+            </div>
+            <button>연속</button>
+          </div>
         </div>
         <div className={styles.manual}>
-          <select ref={modeSelectRef} className={styles.manual_mode}>
-            <option value='PLC'>PLC</option>
-            <option value='Pixel'>Pixel 👉 PLC</option>
-          </select>
           <div>
-            <input ref={xInputRef} type="number" />
-            <input ref={yInputRef} type="number" />
-            <button onClick={handleManualShoot}>수동</button>
+            <select ref={modeSelectRef} className={styles.manual_mode}>
+              <option value='PLC'>PLC</option>
+              <option value='Pixel'>Pixel 👉 PLC</option>
+            </select>
+            <div className={styles.manual_input}>
+              <input ref={xInputRef} type="number" />
+              <input ref={yInputRef} type="number" />
+            </div>
           </div>
+          <button onClick={handleManualShoot}>수동</button>
         </div>
       </div>
     </main>
