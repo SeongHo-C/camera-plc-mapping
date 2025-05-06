@@ -33,43 +33,62 @@ export default function App() {
   useEffect(() => {
     const socket = new WebSocket('ws://localhost:8765');
     socket.binaryType = 'arraybuffer';
-    setWs(socket)
+    setWs(socket);
 
     let prevUrl = null;
 
     socket.onmessage = async (e) => {
-      const blob = new Blob([e.data], { type: 'image/jpeg' });
-      const url = URL.createObjectURL(blob)
+      try {
+        const blob = new Blob([e.data], { type: 'image/jpeg' });
+        const url = URL.createObjectURL(blob);
 
-      if (prevUrl) {
-        URL.revokeObjectURL(prevUrl);
-      }
+        if (prevUrl) {
+          URL.revokeObjectURL(prevUrl);
+        }
+        prevUrl = url;
+        setFrame(url);
 
-      prevUrl = url;
-      setFrame(url);
+        // FPS 계산
+        const now = performance.now();
+        frameTimesRef.current = frameTimesRef.current.filter(t => now - t < 1000);
+        frameTimesRef.current.push(now);
 
-      // 고해상도 시간 측정(성능 측정에 적합)
-      const now = performance.now();
-
-      frameTimesRef.current = frameTimesRef.current.filter(t => now - t < 1000);
-      frameTimesRef.current.push(now);
-
-      if (now - lastFpsUpdateRef.current > 200) {
-        setFps(frameTimesRef.current.length);
-        lastFpsUpdateRef.current = now;
-      }
+        if (now - lastFpsUpdateRef.current > 200) {
+          setFps(frameTimesRef.current.length);
+          lastFpsUpdateRef.current = now;
+        }
+      } catch (error) {
+        console.error('프레임 처리 중 오류 발생:', error);
+      }                        
     }
 
     socket.onopen = () => {
       console.log('웹소켓 연결 성공');
-      socket.send(JSON.stringify({ type: 'camera', action: 'start'}))
+      try {
+        socket.send(JSON.stringify({ type: 'camera', action: 'start' }));
+      } catch (error) {
+        console.error('카메라 시작 명령 전송 실패:', error);
+      }
     }
 
+    socket.onerror = (error) => {
+      console.error('웹소켓 오류 발생:', error);
+    }
+
+    socket.onclose = (event) => {
+      console.log(`웹소켓 연결 종료 (코드: ${event.code}, 이유: ${event.reason})`);
+    };
+
     return () => {
-      socket.close();
+      if (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING) {
+        socket.close();
+      }
+      
       if (prevUrl) {
         URL.revokeObjectURL(prevUrl);
       }
+      
+      frameTimesRef.current = [];
     }
   }, [])
 
