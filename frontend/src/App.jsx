@@ -5,6 +5,8 @@ export default function App() {
   const [frame, setFrame] = useState('');
   const [fps, setFps] = useState(0);
   const [ws, setWs] = useState(null);
+  const [range, setRange] = useState(defaultRange)
+  const [center, setCenter] = useState(defaultCenter)
 
   const modeSelectRef = useRef(null)
   const xInputRef = useRef(null)
@@ -19,6 +21,13 @@ export default function App() {
     const y = yInputRef.current.value;
 
     ws.send(JSON.stringify({ type: 'shoot', action: 'manual', data: {mode, x, y}}))
+  }
+
+  const handleCenterCoordinate = (e) => {
+    const name = e.target.name;
+    const value = parseInt(e.target.value);
+    
+    setCenter({...center, [name]: value});
   }
 
   useEffect(() => {
@@ -88,7 +97,7 @@ export default function App() {
             </div>
             <div className={styles.LB}>
               <input className={styles.target_input} type="number" />
-              <input className={styles.target_input} type="number" />
+              <input className={styles.target_input} type="number"/>
             </div>
             <div className={styles.RB}>
               <input className={styles.target_input} type="number" />
@@ -96,16 +105,16 @@ export default function App() {
             </div>
             <div className={styles.dot} />
             <div className={styles.center}>
-              <input className={styles.target_input} type="number" />
-              <input className={styles.target_input} type="number" />
+              <input className={styles.target_input} type="number" name="x" defaultValue={center.x} onChange={handleCenterCoordinate} />
+              <input className={styles.target_input} type="number" name="y" defaultValue={center.y} onChange={handleCenterCoordinate}/>
             </div>
           </div>
           <div className={styles.range}>
             <div>
               <span>상하:</span>
-              <input className={styles.target_input} type="number" />
+              <input className={styles.target_input} type="number" defaultValue={range.x} />
               <span>좌우:</span>
-              <input className={styles.target_input} type="number" />
+              <input className={styles.target_input} type="number" defaultValue={range.y} />
             </div>
             <button>연속</button>
           </div>
@@ -128,3 +137,5 @@ export default function App() {
   );
 }
 
+const defaultRange = { 'x': 0, 'y': 0 };
+const defaultCenter = { 'x': 5000, 'y': 2500 };
