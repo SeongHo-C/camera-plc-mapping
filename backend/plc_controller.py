@@ -1,4 +1,5 @@
 import time
+import numpy as np
 from pyModbusTCP.client import ModbusClient
 
 
@@ -7,9 +8,18 @@ class PlcController:
         self.client = ModbusClient(host='192.168.1.10', port=502)
 
         if self.client.open():
-            self.client.write_single_register(1800, 0)  # 발사
-            # time.sleep(0.05)
+            if self.client.write_single_register(1800, 0):  # 발사
+                print('발사 허용 안함 쓰기 성공')
+                time.sleep(0.05)
+            else:
+                print('발사 허용 안함 쓰기 실패')
+
             self.client.write_single_register(1805, 0)  # 레이저
+
+        self.pixel_corner = [(0, 0), (640, 0), (0, 480), (640, 480)]
+        # json 파일 로드할 예정
+        self.plc_corner = [(6200, 2900), (3540, 2900), (6200, 1350), (3540, 1350)]
+        self.affine_mat = self.calculate_affine_matrix(self.pixel_corner, self.plc_corner)
 
     def manual_shoot(self, mode, x, y):
         if mode == 'PLC':
@@ -24,16 +34,60 @@ class PlcController:
                 print('PLC 좌표 쓰기 실패')
             """
             print(f'PLC 좌표 쓰기 성공: {x}, {y}')
+        elif mode == 'Pixel':
+            plc_x, plc_y = self.pixel_to_plc(x, y)
+
+            """
+            if self.client.write_single_register(1500, plc_x):
+                self.client.write_single_register(1600, plc_y)
+                print(f'PLC 좌표 쓰기 성공: {plc_x}, {plc_y}')
+            else:
+                print('PLC 좌표 쓰기 실패')
+            """
+            print(f'PLC 좌표 쓰기 성공: {plc_x}, {plc_y}')
 
     def continuous_shoot(self, corner):
         for coordinate in corner:
             x = int(coordinate['x'])
             y = int(coordinate['y'])
 
-            # if self.client.write_single_register(1500, x):
-            #     self.client.write_single_register(1600, y)
-            #     print(f'PLC 좌표 쓰기 성공: {x}, {y}')
-            # else:
-            #     print(f'PLC 좌표 쓰기 실패: {x}, {y}')
+            """
+            if self.client.write_single_register(1500, x):
+                self.client.write_single_register(1600, y)
+                print(f'PLC 좌표 쓰기 성공: {x}, {y}')
+            else:
+                print(f'PLC 좌표 쓰기 실패: {x}, {y}')
+            """
             print(f'PLC 좌표 쓰기 성공: {x}, {y}')
             time.sleep(2)
+
+    def pixel_to_plc(self, x, y):
+        pixel_vec = np.array([x, y, 1], dtype=np.int64)
+        plc_vec = self.affine_mat @ pixel_vec
+
+        return round(plc_vec[0]), round(plc_vec[1])
+
+    def calculate_affine_matrix(self, pixel_pts, plc_pts):
+        # 4개 이상의 대응점으로 아핀 변환 행렬 계산 (최소제곱법)
+        A = []
+        B = []
+
+        for (x, y), (X, Y) in zip(pixel_pts, plc_pts):
+            A.append([x, y, 1, 0, 0, 0])
+            A.append([0, 0, 0, x, y, 1])
+            B.extend([X, Y])
+
+        A = np.array(A)
+        B = np.array(B)
+
+        # 최소제곱법으로 파라미터 추정
+        params = np.linalg.lstsq(A, B, rcond=None)[0]
+        a, b, c, d, e, f = params
+
+        # 3x3 아핀 변환 행렬 구성
+        affine_mat = np.array([
+            [a, b, c],
+            [d, e, f],
+            [0, 0, 1]
+        ])
+        return affine_mat
