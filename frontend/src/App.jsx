@@ -21,7 +21,11 @@ export default function App() {
     const x = xInputRef.current.value;
     const y = yInputRef.current.value;
 
-    ws.send(JSON.stringify({ type: 'shoot', action: 'manual', data: {mode, x, y}}))
+    ws.send(JSON.stringify({ type: 'shoot', action: 'manual', data: { mode, x, y } }));
+  }
+
+  const handleContinuousShoot = () => {
+    ws.send(JSON.stringify({ type: 'shoot', action: 'continuous', data: Object.values(corner) }));    
   }
 
   const handleCenterCoordinate = (e) => {
@@ -163,7 +167,7 @@ export default function App() {
               <span>좌우:</span>
               <input className={styles.target_input} type="number" name="y" value={range.y} onChange={handleRange} />
             </div>
-            <button>연속</button>
+            <button onClick={handleContinuousShoot}>연속</button>
           </div>
         </div>
         <div className={styles.manual}>

@@ -24,3 +24,16 @@ class PlcController:
                 print('PLC 좌표 쓰기 실패')
             """
             print(f'PLC 좌표 쓰기 성공: {x}, {y}')
+
+    def continuous_shoot(self, corner):
+        for coordinate in corner:
+            x = int(coordinate['x'])
+            y = int(coordinate['y'])
+
+            # if self.client.write_single_register(1500, x):
+            #     self.client.write_single_register(1600, y)
+            #     print(f'PLC 좌표 쓰기 성공: {x}, {y}')
+            # else:
+            #     print(f'PLC 좌표 쓰기 실패: {x}, {y}')
+            print(f'PLC 좌표 쓰기 성공: {x}, {y}')
+            time.sleep(2)

@@ -29,6 +29,8 @@ class WebsocketServer:
                 y = command_data['y']
 
                 self.plc_controller.manual_shoot(mode, x, y)
+            elif command_action == 'continuous':
+                self.plc_controller.continuous_shoot(command_data)
 
     async def handle_connection(self, websocket):
         print('클라이언트 연결 성공')
