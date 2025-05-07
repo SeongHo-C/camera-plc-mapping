@@ -5,8 +5,9 @@ export default function App() {
   const [frame, setFrame] = useState('');
   const [fps, setFps] = useState(0);
   const [ws, setWs] = useState(null);
-  const [range, setRange] = useState(defaultRange)
-  const [center, setCenter] = useState(defaultCenter)
+  const [range, setRange] = useState(defaultRange);
+  const [center, setCenter] = useState(defaultCenter);
+  const [corner, setCorner] = useState(defaultCorner);
 
   const modeSelectRef = useRef(null)
   const xInputRef = useRef(null)
@@ -25,9 +26,36 @@ export default function App() {
 
   const handleCenterCoordinate = (e) => {
     const name = e.target.name;
-    const value = parseInt(e.target.value);
+    const value = parseInt(e.target.value) || 0;
     
-    setCenter({...center, [name]: value});
+    setCenter({ ...center, [name]: value });
+    handleCornerCoordinates({ ...center, [name]: value }, range);
+  }
+
+  const handleRange = (e) => {
+    const name = e.target.name;
+    const value = parseInt(e.target.value) || 0;
+
+    setRange({ ...range, [name]: value });
+    handleCornerCoordinates(center, { ...range, [name]: value });
+  }
+
+  const handleCornerCoordinates = (center, range) => {
+    const newCornerCoordinate = {
+      'LT': { 'x': center.x + range.x, 'y': center.y + range.y },
+      'RT': { 'x': center.x - range.x, 'y': center.y + range.y },
+      'LB': { 'x': center.x + range.x, 'y': center.y - range.y },
+      'RB': { 'x': center.x - range.x, 'y': center.y - range.y },
+    }
+    
+    setCorner(newCornerCoordinate)
+  }
+
+  const handleCornerCoordinate = (e) => {
+    const [oneCorner, coordinate] = e.target.name.split('_');
+    const value = parseInt(e.target.value) || 0;
+
+    setCorner({ ...corner, [oneCorner]: { ...corner[oneCorner], [coordinate]: value } });
   }
 
   useEffect(() => {
@@ -107,33 +135,33 @@ export default function App() {
           <span className={styles.title}>표적지</span>
           <div className={styles.target}>
             <div className={styles.LT}>
-              <input className={styles.target_input} type="number" />
-              <input className={styles.target_input} type="number" />
+              <input className={styles.target_input} type="number" name="LT_x" value={corner.LT.x} onChange={handleCornerCoordinate} />
+              <input className={styles.target_input} type="number" name="LT_y" value={corner.LT.y} onChange={handleCornerCoordinate} />
             </div>
             <div className={styles.RT}>
-              <input className={styles.target_input} type="number" />
-              <input className={styles.target_input} type="number" />
+              <input className={styles.target_input} type="number" name="RT_x" value={corner.RT.x} onChange={handleCornerCoordinate} />
+              <input className={styles.target_input} type="number" name="RT_y" value={corner.RT.y} onChange={handleCornerCoordinate} />
             </div>
             <div className={styles.LB}>
-              <input className={styles.target_input} type="number" />
-              <input className={styles.target_input} type="number"/>
+              <input className={styles.target_input} type="number" name="LB_x" value={corner.LB.x} onChange={handleCornerCoordinate} />
+              <input className={styles.target_input} type="number" name="LB_y" value={corner.LB.y} onChange={handleCornerCoordinate} />
             </div>
             <div className={styles.RB}>
-              <input className={styles.target_input} type="number" />
-              <input className={styles.target_input} type="number" />
+              <input className={styles.target_input} type="number" name="RB_x" value={corner.RB.x} onChange={handleCornerCoordinate} />
+              <input className={styles.target_input} type="number" name="RB_y" value={corner.RB.y} onChange={handleCornerCoordinate} />
             </div>
             <div className={styles.dot} />
             <div className={styles.center}>
-              <input className={styles.target_input} type="number" name="x" defaultValue={center.x} onChange={handleCenterCoordinate} />
-              <input className={styles.target_input} type="number" name="y" defaultValue={center.y} onChange={handleCenterCoordinate}/>
+              <input className={styles.target_input} type="number" name="x" value={center.x} onChange={handleCenterCoordinate} />
+              <input className={styles.target_input} type="number" name="y" value={center.y} onChange={handleCenterCoordinate} />
             </div>
           </div>
           <div className={styles.range}>
             <div>
               <span>상하:</span>
-              <input className={styles.target_input} type="number" defaultValue={range.x} />
+              <input className={styles.target_input} type="number" name="x" value={range.x} onChange={handleRange} />
               <span>좌우:</span>
-              <input className={styles.target_input} type="number" defaultValue={range.y} />
+              <input className={styles.target_input} type="number" name="y" value={range.y} onChange={handleRange} />
             </div>
             <button>연속</button>
           </div>
@@ -158,3 +186,9 @@ export default function App() {
 
 const defaultRange = { 'x': 0, 'y': 0 };
 const defaultCenter = { 'x': 5000, 'y': 2500 };
+const defaultCorner = {
+  'LT': { 'x': defaultCenter.x + defaultRange.x, 'y': defaultCenter.y + defaultRange.y },
+  'RT': { 'x': defaultCenter.x - defaultRange.x, 'y': defaultCenter.y + defaultRange.y },
+  'LB': { 'x': defaultCenter.x + defaultRange.x, 'y': defaultCenter.y - defaultRange.y  },
+  'RB': { 'x': defaultCenter.x - defaultRange.x, 'y': defaultCenter.y - defaultRange.y  },
+};
