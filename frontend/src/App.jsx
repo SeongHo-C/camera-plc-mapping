@@ -8,6 +8,7 @@ export default function App() {
   const [range, setRange] = useState(defaultRange);
   const [center, setCenter] = useState(defaultCenter);
   const [corner, setCorner] = useState(defaultCorner);
+  const [unit, setUnit] = useState(0);
 
   const modeSelectRef = useRef(null)
   const xInputRef = useRef(null)
@@ -60,6 +61,24 @@ export default function App() {
     const value = parseInt(e.target.value) || 0;
 
     setCorner({ ...corner, [oneCorner]: { ...corner[oneCorner], [coordinate]: value } });
+  }
+
+  const handleUnit = (e) => {
+    setUnit(e.target.value);
+  }
+
+  const handleRatioCoordinates = (e) => {
+    const selectedUnit = e.target.value; 
+    const ratioX = 4 * selectedUnit;
+    const ratioY = 3 * selectedUnit;
+    const newCornerCoordinate = {
+      'LT': { 'x': center.x + ratioX, 'y': center.y + ratioY },
+      'RT': { 'x': center.x - ratioX, 'y': center.y + ratioY },
+      'LB': { 'x': center.x + ratioX, 'y': center.y - ratioY },
+      'RB': { 'x': center.x - ratioX, 'y': center.y - ratioY },
+    };
+    
+    setCorner(newCornerCoordinate) 
   }
 
   useEffect(() => {
@@ -160,12 +179,21 @@ export default function App() {
               <input className={styles.target_input} type="number" name="y" value={center.y} onChange={handleCenterCoordinate} />
             </div>
           </div>
-          <div className={styles.range}>
+          <div className={styles.target_change}>
             <div>
-              <span>상하:</span>
-              <input className={styles.target_input} type="number" name="x" value={range.x} onChange={handleRange} />
-              <span>좌우:</span>
-              <input className={styles.target_input} type="number" name="y" value={range.y} onChange={handleRange} />
+              <div className={styles.range}>
+                <span>상하:</span>
+                <input className={styles.target_input} type="number" name="x" value={range.x} onChange={handleRange} />
+                <span>좌우:</span>
+                <input className={styles.target_input} type="number" name="y" value={range.y} onChange={handleRange} />
+              </div>
+              <div className={styles.unit}>
+                <span>단위:</span>
+                <input className={styles.target_input} type="number" value={unit} onChange={handleUnit}/>
+                <select className={styles.unit_select} onChange={handleRatioCoordinates}>
+                  {[0, 1, 2, 3, 4, 5].map((num) => <option value={unit * num}>{unit * num}</option>)}
+                </select>
+              </div>
             </div>
             <button onClick={handleContinuousShoot}>연속</button>
           </div>

@@ -132,23 +132,30 @@
     text-align: center;
 }
 
-.range {
+.target_change {
     display: flex;
-        
-    margin-top: 10px;
-}
-
-.range > div {
-    width: calc(16rem + 20px);
-    
-    display: flex;
-    justify-content: space-between;
     align-items: center;
 
     font-size: 18px;
 }
 
-.range > button {
+.target_change > div {
+    width: calc(16rem + 20px);
+    
+    display: flex;
+    flex-direction: column;
+}
+
+.range, .unit {
+    display: flex;
+    justify-content: space-between;
+        
+    margin-top: 15px;
+}
+
+
+
+.target_change > button {
     width: 4.5rem;
     height: 4.5rem;
     
@@ -161,10 +168,20 @@
     font-weight: bold;
 }
 
-.range > button:hover {
+.target_change > button:hover {
     background-color: red;
 }
 
+.unit_select {
+    width: 5.5rem;
+    height: 2rem;
+
+    padding: 0 5px;
+    border: 2px solid gray;
+    border-radius: 10px;
+    font-size: 18px;
+    text-align: center;
+}
 
 .manual {
     width: 400px;
