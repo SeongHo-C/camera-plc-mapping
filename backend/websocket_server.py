@@ -37,6 +37,8 @@ class WebsocketServer:
                 save_json('data/mapping_items.json', command_data)
             elif command_action == 'load':
                 await load_json('data/mapping_items.json', websocket)
+            elif command_action == 'mapping':
+                self.plc_controller.calculate_affine_matrix(command_data)
 
     async def handle_connection(self, websocket):
         print('클라이언트 연결 성공')

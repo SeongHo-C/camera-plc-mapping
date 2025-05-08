@@ -12,9 +12,9 @@ export default function App() {
   const [mappingItems, setMappingItems] = useState(defaultMappingItems);
   const [unit, setUnit] = useState(0);
 
-  const modeSelectRef = useRef(null)
-  const xInputRef = useRef(null)
-  const yInputRef = useRef(null)
+  const modeSelectRef = useRef(null);
+  const xInputRef = useRef(null);
+  const yInputRef = useRef(null);
 
   const frameTimesRef = useRef([]);
   const lastFpsUpdateRef = useRef(0);
@@ -80,7 +80,7 @@ export default function App() {
       'RB': { 'x': center.x - ratioX, 'y': center.y - ratioY },
     };
     
-    setCorner(newCornerCoordinate) 
+    setCorner(newCornerCoordinate);
   }
 
   const handleMappingItems = (e) => {
@@ -92,7 +92,7 @@ export default function App() {
       return coord;
     })  
 
-    setMappingItems({...mappingItems, [title]: newMappingItem})
+    setMappingItems({ ...mappingItems, [title]: newMappingItem });
   }
 
   const saveMappingItems = () => {
@@ -101,6 +101,10 @@ export default function App() {
 
   const loadMappingItems = () => {
     ws.send(JSON.stringify({ type: 'mapping', action: 'load' }));
+  }
+
+  const handleMapping = () => {
+    ws.send(JSON.stringify({ type: 'mapping', action: 'mapping', data: mappingItems }));
   }
 
   useEffect(() => {
@@ -249,7 +253,7 @@ export default function App() {
             <div className={styles.mapping_buttons}>
               <button onClick={loadMappingItems}>불러오기</button>
               <button onClick={saveMappingItems}>저장하기</button>
-              <button>매핑하기</button>
+              <button onClick={handleMapping}>매핑하기</button>
             </div>
           </div>
           <div>

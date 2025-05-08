@@ -16,11 +16,6 @@ class PlcController:
 
             self.client.write_single_register(1805, 0)  # 레이저
 
-        self.pixel_corner = [(0, 0), (640, 0), (0, 480), (640, 480)]
-        # json 파일 로드할 예정
-        self.plc_corner = [(6200, 2900), (3540, 2900), (6200, 1350), (3540, 1350)]
-        self.affine_mat = self.calculate_affine_matrix(self.pixel_corner, self.plc_corner)
-
     def manual_shoot(self, mode, x, y):
         if mode == 'PLC':
             # 연속된 주소(1500, 1501)로 변경 희망, 하나의 주소만을 쓰더라도 사격이 되는지 확인 필요
@@ -67,7 +62,11 @@ class PlcController:
 
         return round(plc_vec[0]), round(plc_vec[1])
 
-    def calculate_affine_matrix(self, pixel_pts, plc_pts):
+    def calculate_affine_matrix(self, mapping_items):
+        converted = {key: [tuple(coord) for coord in coords] for key, coords in mapping_items.items()}
+        pixel_pts = converted['Pixel']
+        plc_pts = converted['PLC']
+
         # 4개 이상의 대응점으로 아핀 변환 행렬 계산 (최소제곱법)
         A = []
         B = []
@@ -85,9 +84,8 @@ class PlcController:
         a, b, c, d, e, f = params
 
         # 3x3 아핀 변환 행렬 구성
-        affine_mat = np.array([
+        self.affine_mat = np.array([
             [a, b, c],
             [d, e, f],
             [0, 0, 1]
         ])
-        return affine_mat
