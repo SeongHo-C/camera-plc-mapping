@@ -1,0 +1,29 @@
+.mapping_container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-top: 10px;
+}
+
+.mapping_container > div {
+    display: flex;
+    gap: 10px;
+}
+
+.title {
+    width: 100px;
+    font-size: 18px;
+    /* font-weight: bold; */
+}
+
+.coordinate_input {
+    width: 5.5rem;
+    height: 2rem;
+
+    padding: 5px 10px;
+    border: 2px solid gray;
+    border-radius: 10px;
+    font-size: 18px;
+    text-align: center;
+}

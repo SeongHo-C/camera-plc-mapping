@@ -1,10 +1,15 @@
-.container {
+section {
     width: 100vw;
     height: 100vh;
 
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
+}
+
+main {
+    display: flex;
 }
 
 .left {
@@ -166,6 +171,7 @@
     margin-left: 40px;
     font-size: 18px;
     font-weight: bold;
+    cursor: pointer;
 }
 
 .target_change > button:hover {
@@ -215,7 +221,7 @@
 
 .manual_input > input {
     width: 8rem;
-    height: 2.5rem;
+    height: 2rem;
 
     padding: 5px 10px;
     border: 2px solid gray;
@@ -235,9 +241,49 @@
     margin-left: 40px;
     font-size: 18px;
     font-weight: bold;
+    cursor: pointer;
 }
 
 .manual > button:hover {
     background-color: red;
 }
 
+.mapping {
+    width: 1320px;
+
+    border: 3px solid gray;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.mapping_top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.mapping_top > span {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.mapping_buttons {
+    display: flex;
+    gap: 12px;
+    margin: 0 0 20px 0;
+}
+
+.mapping_buttons > button {
+    padding: 5px 10px;
+    border: 1px solid #4a90e2;
+    background-color: #fff;
+    color: #4a90e2;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.mapping_buttons > button:hover {
+    background-color: #4a90e2;
+    color: #fff;
+}

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styles from './App.module.css'
+import MappingPoints from './components/MappingPoints/MappingPoints';
 
 export default function App() {
   const [frame, setFrame] = useState('');
@@ -8,6 +9,7 @@ export default function App() {
   const [range, setRange] = useState(defaultRange);
   const [center, setCenter] = useState(defaultCenter);
   const [corner, setCorner] = useState(defaultCorner);
+  const [mappingItems, setMappingItems] = useState(defaultMappingItems);
   const [unit, setUnit] = useState(0);
 
   const modeSelectRef = useRef(null)
@@ -144,75 +146,93 @@ export default function App() {
   }, [])
 
   return (
-    <main className={styles.container}>
-      <div className={styles.left}>
-        <div className={styles.fps}>
-          <span>FPS: {fps}</span>
+    <section>
+      <main>
+        <div className={styles.left}>
+          <div className={styles.fps}>
+            <span>FPS: {fps}</span>
+          </div>
+          <div className={styles.camera_container}>
+            {frame && <img className={styles.camera} src={frame} alt='realtime-video' />}
+          </div>
         </div>
-        <div className={styles.camera_container}>
-          {frame && <img className={styles.camera} src={frame} alt='realtime-video' />}
-        </div>
-      </div>
-      <div className={styles.right}>
-        <div className={styles.target_container}>
-          <span className={styles.title}>표적지</span>
-          <div className={styles.target}>
-            <div className={styles.LT}>
-              <input className={styles.target_input} type="number" name="LT_x" value={corner.LT.x} onChange={handleCornerCoordinate} />
-              <input className={styles.target_input} type="number" name="LT_y" value={corner.LT.y} onChange={handleCornerCoordinate} />
+        <div className={styles.right}>
+          <div className={styles.target_container}>
+            <span className={styles.title}>표적지</span>
+            <div className={styles.target}>
+              <div className={styles.LT}>
+                <input className={styles.target_input} type="number" name="LT_x" value={corner.LT.x} onChange={handleCornerCoordinate} />
+                <input className={styles.target_input} type="number" name="LT_y" value={corner.LT.y} onChange={handleCornerCoordinate} />
+              </div>
+              <div className={styles.RT}>
+                <input className={styles.target_input} type="number" name="RT_x" value={corner.RT.x} onChange={handleCornerCoordinate} />
+                <input className={styles.target_input} type="number" name="RT_y" value={corner.RT.y} onChange={handleCornerCoordinate} />
+              </div>
+              <div className={styles.LB}>
+                <input className={styles.target_input} type="number" name="LB_x" value={corner.LB.x} onChange={handleCornerCoordinate} />
+                <input className={styles.target_input} type="number" name="LB_y" value={corner.LB.y} onChange={handleCornerCoordinate} />
+              </div>
+              <div className={styles.RB}>
+                <input className={styles.target_input} type="number" name="RB_x" value={corner.RB.x} onChange={handleCornerCoordinate} />
+                <input className={styles.target_input} type="number" name="RB_y" value={corner.RB.y} onChange={handleCornerCoordinate} />
+              </div>
+              <div className={styles.dot} />
+              <div className={styles.center}>
+                <input className={styles.target_input} type="number" name="x" value={center.x} onChange={handleCenterCoordinate} />
+                <input className={styles.target_input} type="number" name="y" value={center.y} onChange={handleCenterCoordinate} />
+              </div>
             </div>
-            <div className={styles.RT}>
-              <input className={styles.target_input} type="number" name="RT_x" value={corner.RT.x} onChange={handleCornerCoordinate} />
-              <input className={styles.target_input} type="number" name="RT_y" value={corner.RT.y} onChange={handleCornerCoordinate} />
-            </div>
-            <div className={styles.LB}>
-              <input className={styles.target_input} type="number" name="LB_x" value={corner.LB.x} onChange={handleCornerCoordinate} />
-              <input className={styles.target_input} type="number" name="LB_y" value={corner.LB.y} onChange={handleCornerCoordinate} />
-            </div>
-            <div className={styles.RB}>
-              <input className={styles.target_input} type="number" name="RB_x" value={corner.RB.x} onChange={handleCornerCoordinate} />
-              <input className={styles.target_input} type="number" name="RB_y" value={corner.RB.y} onChange={handleCornerCoordinate} />
-            </div>
-            <div className={styles.dot} />
-            <div className={styles.center}>
-              <input className={styles.target_input} type="number" name="x" value={center.x} onChange={handleCenterCoordinate} />
-              <input className={styles.target_input} type="number" name="y" value={center.y} onChange={handleCenterCoordinate} />
+            <div className={styles.target_change}>
+              <div>
+                <div className={styles.range}>
+                  <span>상하:</span>
+                  <input className={styles.target_input} type="number" name="x" value={range.x} onChange={handleRange} />
+                  <span>좌우:</span>
+                  <input className={styles.target_input} type="number" name="y" value={range.y} onChange={handleRange} />
+                </div>
+                <div className={styles.unit}>
+                  <span>단위:</span>
+                  <input className={styles.target_input} type="number" value={unit} onChange={handleUnit}/>
+                  <select className={styles.unit_select} onChange={handleRatioCoordinates}>
+                    {[0, 1, 2, 3, 4, 5].map((num) => <option value={unit * num}>{unit * num}</option>)}
+                  </select>
+                </div>
+              </div>
+              <button onClick={handleContinuousShoot}>연속</button>
             </div>
           </div>
-          <div className={styles.target_change}>
+          <div className={styles.manual}>
             <div>
-              <div className={styles.range}>
-                <span>상하:</span>
-                <input className={styles.target_input} type="number" name="x" value={range.x} onChange={handleRange} />
-                <span>좌우:</span>
-                <input className={styles.target_input} type="number" name="y" value={range.y} onChange={handleRange} />
-              </div>
-              <div className={styles.unit}>
-                <span>단위:</span>
-                <input className={styles.target_input} type="number" value={unit} onChange={handleUnit}/>
-                <select className={styles.unit_select} onChange={handleRatioCoordinates}>
-                  {[0, 1, 2, 3, 4, 5].map((num) => <option value={unit * num}>{unit * num}</option>)}
-                </select>
+              <select ref={modeSelectRef} className={styles.manual_mode}>
+                <option value='PLC'>PLC</option>
+                <option value='Pixel'>Pixel 👉 PLC</option>
+              </select>
+              <div className={styles.manual_input}>
+                <input ref={xInputRef} type="number" />
+                <input ref={yInputRef} type="number" />
               </div>
             </div>
-            <button onClick={handleContinuousShoot}>연속</button>
+            <button onClick={handleManualShoot}>수동</button>
           </div>
         </div>
-        <div className={styles.manual}>
+      </main>
+      <footer>
+        <div className={styles.mapping}>
+          <div className={styles.mapping_top}>
+            <span>PLC, Pixel 매핑</span>
+            <div className={styles.mapping_buttons}>
+              <button>불러오기</button>
+              <button>저장하기</button>
+              <button>매핑하기</button>
+            </div>
+          </div>
           <div>
-            <select ref={modeSelectRef} className={styles.manual_mode}>
-              <option value='PLC'>PLC</option>
-              <option value='Pixel'>Pixel 👉 PLC</option>
-            </select>
-            <div className={styles.manual_input}>
-              <input ref={xInputRef} type="number" />
-              <input ref={yInputRef} type="number" />
-            </div>
+            <MappingPoints title="PLC" mappingItem={mappingItems.PLC} />
+            <MappingPoints title="Pixel" mappingItem={mappingItems.Pixel} />
           </div>
-          <button onClick={handleManualShoot}>수동</button>
         </div>
-      </div>
-    </main>
+      </footer>
+    </section>
   );
 }
 
@@ -224,3 +244,7 @@ const defaultCorner = {
   'LB': { 'x': defaultCenter.x + defaultRange.x, 'y': defaultCenter.y - defaultRange.y  },
   'RB': { 'x': defaultCenter.x - defaultRange.x, 'y': defaultCenter.y - defaultRange.y  },
 };
+const defaultMappingItems = {
+  'PLC': [[0, 0], [0, 0], [0, 0], [0, 0]],
+  'Pixel': [[0, 0], [0, 0], [0, 0], [0, 0]]
+}
