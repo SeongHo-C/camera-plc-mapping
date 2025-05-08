@@ -89,3 +89,10 @@ class PlcController:
             [d, e, f],
             [0, 0, 1]
         ])
+
+    def plc_control(self, address, mode):
+        # if self.client.write_single_register(address, mode):
+        #     print(f'{address} 주소 쓰기 성공: {mode}')
+        # else:
+        #     print(f'{address} 주소 쓰기 실패')
+        print(f'{address} 주소 쓰기 성공: {mode}')
