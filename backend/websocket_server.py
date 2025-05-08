@@ -3,6 +3,7 @@ import asyncio
 import json
 from camera import Camera
 from plc_controller import PlcController
+from utils import save_json, load_json
 
 
 class WebsocketServer:
@@ -31,6 +32,11 @@ class WebsocketServer:
                 self.plc_controller.manual_shoot(mode, x, y)
             elif command_action == 'continuous':
                 self.plc_controller.continuous_shoot(command_data)
+        elif command_type == 'mapping':
+            if command_action == 'save':
+                save_json('data/mapping_items.json', command_data)
+            elif command_action == 'load':
+                await load_json('data/mapping_items.json', websocket)
 
     async def handle_connection(self, websocket):
         print('클라이언트 연결 성공')

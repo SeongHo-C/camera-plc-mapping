@@ -83,6 +83,26 @@ export default function App() {
     setCorner(newCornerCoordinate) 
   }
 
+  const handleMappingItems = (e) => {
+    const [title, order, oneCoord] = e.target.name.split('_');
+    const value = parseInt(e.target.value);
+    
+    const newMappingItem = mappingItems[title].map((coord, idx) => {
+      if (idx === parseInt(order)) coord[oneCoord] = value;
+      return coord;
+    })  
+
+    setMappingItems({...mappingItems, [title]: newMappingItem})
+  }
+
+  const saveMappingItems = () => {
+    ws.send(JSON.stringify({ type: 'mapping', action: 'save', data: mappingItems }));
+  }
+
+  const loadMappingItems = () => {
+    ws.send(JSON.stringify({ type: 'mapping', action: 'load' }));
+  }
+
   useEffect(() => {
     const socket = new WebSocket('ws://localhost:8765');
     socket.binaryType = 'arraybuffer';
@@ -91,28 +111,34 @@ export default function App() {
     let prevUrl = null;
 
     socket.onmessage = async (e) => {
-      try {
-        const blob = new Blob([e.data], { type: 'image/jpeg' });
-        const url = URL.createObjectURL(blob);
+      if (e.data instanceof ArrayBuffer) {
+        try {
+          const blob = new Blob([e.data], { type: 'image/jpeg' });
+          const url = URL.createObjectURL(blob);
 
-        if (prevUrl) {
-          URL.revokeObjectURL(prevUrl);
-        }
-        prevUrl = url;
-        setFrame(url);
+          if (prevUrl) {
+            URL.revokeObjectURL(prevUrl);
+          }
+          prevUrl = url;
+          setFrame(url);
 
-        // FPS 계산
-        const now = performance.now();
-        frameTimesRef.current = frameTimesRef.current.filter(t => now - t < 1000);
-        frameTimesRef.current.push(now);
+          // FPS 계산
+          const now = performance.now();
+          frameTimesRef.current = frameTimesRef.current.filter(t => now - t < 1000);
+          frameTimesRef.current.push(now);
 
-        if (now - lastFpsUpdateRef.current > 200) {
-          setFps(frameTimesRef.current.length);
-          lastFpsUpdateRef.current = now;
-        }
-      } catch (error) {
-        console.error('프레임 처리 중 오류 발생:', error);
-      }                        
+          if (now - lastFpsUpdateRef.current > 200) {
+            setFps(frameTimesRef.current.length);
+            lastFpsUpdateRef.current = now;
+          }
+        } catch (error) {
+          console.error('프레임 처리 중 오류 발생:', error);
+        }                        
+      } else {
+        const message = JSON.parse(e.data);
+        setMappingItems(message.data);        
+      }
+      
     }
 
     socket.onopen = () => {
@@ -194,7 +220,7 @@ export default function App() {
                   <span>단위:</span>
                   <input className={styles.target_input} type="number" value={unit} onChange={handleUnit}/>
                   <select className={styles.unit_select} onChange={handleRatioCoordinates}>
-                    {[0, 1, 2, 3, 4, 5].map((num) => <option value={unit * num}>{unit * num}</option>)}
+                    {[0, 1, 2, 3, 4, 5].map((num) => <option key={num} value={unit * num}>{unit * num}</option>)}
                   </select>
                 </div>
               </div>
@@ -221,14 +247,14 @@ export default function App() {
           <div className={styles.mapping_top}>
             <span>PLC, Pixel 매핑</span>
             <div className={styles.mapping_buttons}>
-              <button>불러오기</button>
-              <button>저장하기</button>
+              <button onClick={loadMappingItems}>불러오기</button>
+              <button onClick={saveMappingItems}>저장하기</button>
               <button>매핑하기</button>
             </div>
           </div>
           <div>
-            <MappingPoints title="PLC" mappingItem={mappingItems.PLC} />
-            <MappingPoints title="Pixel" mappingItem={mappingItems.Pixel} />
+            <MappingPoints title="PLC" mappingItem={mappingItems.PLC} onMappingItems={handleMappingItems} />
+            <MappingPoints title="Pixel" mappingItem={mappingItems.Pixel} onMappingItems={handleMappingItems}/>
           </div>
         </div>
       </footer>
