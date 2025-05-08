@@ -11,6 +11,8 @@ export default function App() {
   const [corner, setCorner] = useState(defaultCorner);
   const [mappingItems, setMappingItems] = useState(defaultMappingItems);
   const [unit, setUnit] = useState(0);
+  const [shootMode, setShootMode] = useState(0);
+  const [laserMode, setLaserMode] = useState(0);
 
   const modeSelectRef = useRef(null);
   const xInputRef = useRef(null);
@@ -260,6 +262,13 @@ export default function App() {
             <MappingPoints title="PLC" mappingItem={mappingItems.PLC} onMappingItems={handleMappingItems} />
             <MappingPoints title="Pixel" mappingItem={mappingItems.Pixel} onMappingItems={handleMappingItems}/>
           </div>
+        </div>
+        <div className={styles.control}>
+          <button className={`${shootMode === 0 ? styles.off : styles.on}`}>사격</button>
+          <button className={`${laserMode === 0 ? styles.off : styles.on}`}>레이저</button>
+          <button className={styles.control_button}>원점</button>
+          <button className={styles.control_button}>캡처</button>
+          <button className={styles.control_button}>테스트</button>
         </div>
       </footer>
     </section>
