@@ -36,7 +36,12 @@ class WebsocketServer:
                 x = command_data['x']
                 y = command_data['y']
 
-                self.plc_controller.manual_shoot(mode, x, y)
+                plc_x, plc_y = self.plc_controller.manual_shoot(mode, x, y)
+                if mode == 'Pixel':
+                    await websocket.send(json.dumps({
+                        'type': 'message',
+                        'message': f'PLC 좌표로 변경 완료되었습니다.\nPixel: ({x}, {y}) 👉 PLC: ({plc_x}, {plc_y})'
+                    }))
             elif command_action == 'continuous':
                 self.plc_controller.continuous_shoot(command_data)
 

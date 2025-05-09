@@ -26,6 +26,7 @@ class PlcController:
                 print('PLC 좌표 쓰기 실패')
             """
             print(f'PLC 좌표 쓰기 성공: {x}, {y}')
+            return x, y
         elif mode == 'Pixel':
             plc_x, plc_y = self.pixel_to_plc(x, y)
 
@@ -37,6 +38,7 @@ class PlcController:
                 print('PLC 좌표 쓰기 실패')
             """
             print(f'PLC 좌표 쓰기 성공: {plc_x}, {plc_y}')
+            return plc_x, plc_y
         elif mode == 'test':
             # 연속된 주소(1500, 1501)로 변경 희망, 하나의 주소만을 쓰더라도 사격이 되는지 확인 필요
             """
@@ -46,6 +48,7 @@ class PlcController:
                 print('PLC 좌표 쓰기 실패')
             """
             print(f'PLC 좌표 쓰기 성공: {x}, {y}')
+            return x, y
 
     def continuous_shoot(self, corner):
         for coordinate in corner:
