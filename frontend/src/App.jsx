@@ -115,6 +115,12 @@ export default function App() {
     setShootMode(mode);
   }
 
+  const handleLaserMode = () => {
+    const mode = laserMode === 0 ? 1 : 0;
+    ws.send(JSON.stringify({ type: 'control', action: 'laserMode', data: mode }));
+    setLaserMode(mode)
+  }
+
   useEffect(() => {
     const socket = new WebSocket('ws://localhost:8765');
     socket.binaryType = 'arraybuffer';
@@ -271,7 +277,7 @@ export default function App() {
         </div>
         <div className={styles.control}>
           <button className={`${shootMode === 0 ? styles.off : styles.on}`} onClick={handleShootMode}>사격</button>
-          <button className={`${laserMode === 0 ? styles.off : styles.on}`}>레이저</button>
+          <button className={`${laserMode === 0 ? styles.off : styles.on}`} onClick={handleLaserMode}>레이저</button>
           <button className={styles.control_button}>원점</button>
           <button className={styles.control_button}>캡처</button>
           <button className={styles.control_button}>테스트</button>
