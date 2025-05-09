@@ -1,13 +1,14 @@
 import cv2
-import base64
-import json
 import websockets
 import asyncio
+import os
+import datetime
 
 
 class Camera:
     def __init__(self):
         self.camera = None
+        self.last_frame = None
 
     def initialize(self):
         try:
@@ -32,6 +33,7 @@ class Camera:
                 ret, frame = self.camera.read()
 
                 if ret:
+                    self.last_frame = frame
                     # 프레임을 JPEG로 인코딩한 뒤 바이너리로 전송
                     _, buffer = cv2.imencode('.jpg', frame)
                     await websocket.send(buffer.tobytes())
@@ -42,3 +44,13 @@ class Camera:
                 break
             except Exception as e:
                 print(f'예외 발생: {e}')
+
+    def capture_frame(self):
+        if self.last_frame is not None:
+            save_dir = 'data/captures'
+            os.makedirs(save_dir, exist_ok=True)
+
+            filename = datetime.datetime.now().strftime('%Y%m%d_%H%M%S') + '.jpg'
+            cv2.imwrite(os.path.join(save_dir, filename), self.last_frame)
+
+            return filename

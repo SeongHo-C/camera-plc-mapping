@@ -18,10 +18,17 @@ class WebsocketServer:
         command_action = data['action']
         command_data = data.get('data')
 
-        if command_type == 'camera' and command_action == 'start':
-            if self.camera.initialize():
-                # asyncio 라이브러리에서 비동기 코드를 동시적으로 실행하기 위해 사용
-                asyncio.create_task(self.camera.streaming(websocket))
+        if command_type == 'camera':
+            if command_action == 'start':
+                if self.camera.initialize():
+                    # asyncio 라이브러리에서 비동기 코드를 동시적으로 실행하기 위해 사용
+                    asyncio.create_task(self.camera.streaming(websocket))
+            elif command_action == 'capture':
+                filename = self.camera.capture_frame()
+                await websocket.send(json.dumps({
+                    'type': 'message',
+                    'message': f'캡처가 완료되었습니다.\n파일명: {filename}'
+                }))
 
         elif command_type == 'shoot':
             if command_action == 'manual':
@@ -32,6 +39,7 @@ class WebsocketServer:
                 self.plc_controller.manual_shoot(mode, x, y)
             elif command_action == 'continuous':
                 self.plc_controller.continuous_shoot(command_data)
+
         elif command_type == 'mapping':
             if command_action == 'save':
                 save_json('data/mapping_items.json', command_data)
@@ -39,6 +47,7 @@ class WebsocketServer:
                 await load_json('data/mapping_items.json', websocket)
             elif command_action == 'mapping':
                 self.plc_controller.calculate_affine_matrix(command_data)
+
         elif command_type == 'control':
             if command_action == 'shootMode':
                 self.plc_controller.plc_control(1800, command_data)

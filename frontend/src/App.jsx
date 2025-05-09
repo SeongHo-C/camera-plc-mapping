@@ -125,6 +125,10 @@ export default function App() {
     ws.send(JSON.stringify({ type: 'shoot', action: 'manual', data: { 'mode': 'PLC', 'x': center.x, 'y': center.y } }));
   }
 
+  const handleCapture = () => {
+    ws.send(JSON.stringify({ type: 'camera', action: 'capture' }));
+  }
+
   useEffect(() => {
     const socket = new WebSocket('ws://localhost:8765');
     socket.binaryType = 'arraybuffer';
@@ -158,7 +162,9 @@ export default function App() {
         }                        
       } else {
         const message = JSON.parse(e.data);
-        setMappingItems(message.data);        
+
+        if (message.type === 'mapping') setMappingItems(message.data);
+        else if (message.type === 'message') alert(message.message);
       }
       
     }
@@ -283,7 +289,7 @@ export default function App() {
           <button className={`${shootMode === 0 ? styles.off : styles.on}`} onClick={handleShootMode}>사격</button>
           <button className={`${laserMode === 0 ? styles.off : styles.on}`} onClick={handleLaserMode}>레이저</button>
           <button className={styles.control_button} onClick={handleCenterShoot}>원점</button>
-          <button className={styles.control_button}>캡처</button>
+          <button className={styles.control_button} onClick={handleCapture}>캡처</button>
           <button className={styles.control_button}>테스트</button>
         </div>
       </footer>
