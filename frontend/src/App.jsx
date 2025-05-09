@@ -121,6 +121,10 @@ export default function App() {
     setLaserMode(mode)
   }
 
+  const handleCenterShoot = () => {
+    ws.send(JSON.stringify({ type: 'shoot', action: 'manual', data: { 'mode': 'PLC', 'x': center.x, 'y': center.y } }));
+  }
+
   useEffect(() => {
     const socket = new WebSocket('ws://localhost:8765');
     socket.binaryType = 'arraybuffer';
@@ -278,7 +282,7 @@ export default function App() {
         <div className={styles.control}>
           <button className={`${shootMode === 0 ? styles.off : styles.on}`} onClick={handleShootMode}>사격</button>
           <button className={`${laserMode === 0 ? styles.off : styles.on}`} onClick={handleLaserMode}>레이저</button>
-          <button className={styles.control_button}>원점</button>
+          <button className={styles.control_button} onClick={handleCenterShoot}>원점</button>
           <button className={styles.control_button}>캡처</button>
           <button className={styles.control_button}>테스트</button>
         </div>
