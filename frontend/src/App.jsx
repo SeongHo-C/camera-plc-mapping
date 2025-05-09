@@ -13,7 +13,8 @@ export default function App() {
   const [unit, setUnit] = useState(0);
   const [shootMode, setShootMode] = useState(0);
   const [laserMode, setLaserMode] = useState(0);
-
+  const [logs, setLogs] = useState([]);
+  
   const modeSelectRef = useRef(null);
   const xInputRef = useRef(null);
   const yInputRef = useRef(null);
@@ -168,9 +169,8 @@ export default function App() {
         const message = JSON.parse(e.data);
 
         if (message.type === 'mapping') setMappingItems(message.data);
-        else if (message.type === 'message') alert(message.message);
+        else if (message.type === 'message') setLogs(prevLogs => [message.message, ...prevLogs]);
       }
-      
     }
 
     socket.onopen = () => {
@@ -272,6 +272,11 @@ export default function App() {
             </div>
             <button onClick={handleManualShoot}>수동</button>
           </div>
+        </div>
+        <div className={styles.log_container}>
+          {logs.map((log, idx) => (
+            <p key={idx}>{log}</p>
+          ))}
         </div>
       </main>
       <footer>

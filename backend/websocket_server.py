@@ -27,7 +27,7 @@ class WebsocketServer:
                 filename = self.camera.capture_frame()
                 await websocket.send(json.dumps({
                     'type': 'message',
-                    'message': f'캡처가 완료되었습니다.\n파일명: {filename}'
+                    'message': f'캡처 완료: {filename}'
                 }))
 
         elif command_type == 'shoot':
@@ -37,27 +37,50 @@ class WebsocketServer:
                 y = command_data['y']
 
                 plc_x, plc_y = self.plc_controller.manual_shoot(mode, x, y)
-                if mode == 'Pixel':
-                    await websocket.send(json.dumps({
-                        'type': 'message',
-                        'message': f'PLC 좌표로 변경 완료되었습니다.\nPixel: ({x}, {y}) 👉 PLC: ({plc_x}, {plc_y})'
-                    }))
+                await websocket.send(json.dumps({
+                    'type': 'message',
+                    'message': f'수동 사격 완료: ({plc_x}, {plc_y})'
+                }))
             elif command_action == 'continuous':
                 self.plc_controller.continuous_shoot(command_data)
+                await websocket.send(json.dumps({
+                    'type': 'message',
+                    'message': '연속 사격 완료'
+                }))
 
         elif command_type == 'mapping':
             if command_action == 'save':
                 save_json('data/mapping_items.json', command_data)
+                await websocket.send(json.dumps({
+                    'type': 'message',
+                    'message': 'PLC, Pixel 매핑 좌표 저장하기'
+                }))
             elif command_action == 'load':
                 await load_json('data/mapping_items.json', websocket)
+                await websocket.send(json.dumps({
+                    'type': 'message',
+                    'message': 'PLC, Pixel 매핑 좌표 불러오기'
+                }))
             elif command_action == 'mapping':
                 self.plc_controller.calculate_affine_matrix(command_data)
+                await websocket.send(json.dumps({
+                    'type': 'message',
+                    'message': '아핀 변환 행렬 구성'
+                }))
 
         elif command_type == 'control':
             if command_action == 'shootMode':
                 self.plc_controller.plc_control(1800, command_data)
+                await websocket.send(json.dumps({
+                    'type': 'message',
+                    'message': f'현재 사격 모드: {"ON" if command_data == 1 else "OFF"}'
+                }))
             elif command_action == 'laserMode':
                 self.plc_controller.plc_control(1805, command_data)
+                await websocket.send(json.dumps({
+                    'type': 'message',
+                    'message': f'현재 레이저 모드: {"ON" if command_data == 1 else "OFF"}'
+                }))
 
     async def handle_connection(self, websocket):
         print('클라이언트 연결 성공')
