@@ -66,9 +66,16 @@ class PlcController:
             time.sleep(2)
 
     def pixel_to_plc(self, x, y):
-        pixel_vec = np.array([x, y, 1], dtype=np.int64)
-        plc_vec = self.affine_mat @ pixel_vec
+        # 아핀 변환 행렬
+        # pixel_vec = np.array([x, y, 1], dtype=np.int64)
+        # plc_vec = self.affine_mat @ pixel_vec
 
+        # 호모그래피 변환 행렬
+        pixel_vec = np.array([x, y, 1], dtype=np.int64)
+        plc_vec = self.homography_mat @ pixel_vec
+
+        # 동차 좌표 정규화
+        plc_vec /= plc_vec[2]
         return round(plc_vec[0]), round(plc_vec[1])
 
     def calculate_affine_matrix(self, mapping_items):
@@ -98,6 +105,31 @@ class PlcController:
             [d, e, f],
             [0, 0, 1]
         ])
+
+    def calculate_homography_matrix(self, mapping_items):
+        converted = {key: [tuple(coord) for coord in coords] for key, coords in mapping_items.items()}
+        # pixel_pts = converted['Pixel']
+        # plc_pts = converted['PLC']
+
+        pixel_pts = [(111, 38), (582, 48), (73, 434), (619, 460), (192, 105),
+                     (499, 114), (177, 344), (510, 354), (268, 161), (419, 167), (262, 277), (423, 283)]
+        plc_pts = [(7400, 4000), (2600, 4000), (7400, 400), (2600, 400),
+                   (6600, 3400), (3400, 3400), (6600, 1000), (3400, 1000), (5800, 2800), (4200, 2800), (5800, 1600), (4200, 1600)]
+
+        # 호모그래피 행렬 계산을 위한 방정식 구성
+        A = []
+        for (x, y), (X, Y) in zip(pixel_pts, plc_pts):
+            A.append([x, y, 1, 0, 0, 0, -X*x, -X*y, -X])
+            A.append([0, 0, 0, x, y, 1, -Y*x, -Y*y, -Y])
+
+        A = np.array(A)
+
+        # SVD를 이용한 최소제곱해 계산
+        _, _, V = np.linalg.svd(A)
+        H = V[-1, :].reshape((3, 3))
+
+        # 정규화 (H[2,2] = 1)
+        self.homography_mat = H / H[2, 2]
 
     def plc_control(self, address, mode):
         # if self.client.write_single_register(address, mode):

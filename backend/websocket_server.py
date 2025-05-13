@@ -62,7 +62,7 @@ class WebsocketServer:
                     'message': 'PLC, Pixel 매핑 좌표 불러오기'
                 }))
             elif command_action == 'mapping':
-                self.plc_controller.calculate_affine_matrix(command_data)
+                self.plc_controller.calculate_homography_matrix(command_data)
                 await websocket.send(json.dumps({
                     'type': 'message',
                     'message': '아핀 변환 행렬 구성'
