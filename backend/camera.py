@@ -31,6 +31,7 @@ class Camera:
         while True:
             try:
                 ret, frame = self.camera.read()
+                # frame = cv2.flip(frame, -1)
 
                 if ret:
                     self.last_frame = frame

@@ -272,11 +272,11 @@ export default function App() {
             </div>
             <button onClick={handleManualShoot}>수동</button>
           </div>
-        </div>
-        <div className={styles.log_container}>
-          {logs.map((log, idx) => (
-            <p key={idx}>{log}</p>
-          ))}
+          <div className={styles.log_container}>
+            {logs.map((log, idx) => (
+              <p key={idx}>{log}</p>
+            ))}
+          </div>
         </div>
       </main>
       <footer>
