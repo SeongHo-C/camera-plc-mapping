@@ -67,43 +67,10 @@ class PlcController:
             time.sleep(2)
 
     def pixel_to_plc(self, x, y):
-        # 아핀 변환 행렬
-        # pixel_vec = np.array([x, y, 1], dtype=np.int64)
-        # plc_vec = self.affine_mat @ pixel_vec
-
         pixel_vec = np.array([x, y], dtype=np.float32).reshape(1, 1, 2)
-        # OpenCV perspectiveTransform 사용
         plc_vec = cv2.perspectiveTransform(pixel_vec, self.homography_mat)
 
-        return int(plc_vec[0][0][0]), int(plc_vec[0][0][1])
-
-    def calculate_affine_matrix(self, mapping_items):
-        converted = {key: [tuple(coord) for coord in coords] for key, coords in mapping_items.items()}
-        pixel_pts = converted['Pixel']
-        plc_pts = converted['PLC']
-
-        # 4개 이상의 대응점으로 아핀 변환 행렬 계산 (최소제곱법)
-        A = []
-        B = []
-
-        for (x, y), (X, Y) in zip(pixel_pts, plc_pts):
-            A.append([x, y, 1, 0, 0, 0])
-            A.append([0, 0, 0, x, y, 1])
-            B.extend([X, Y])
-
-        A = np.array(A)
-        B = np.array(B)
-
-        # 최소제곱법으로 파라미터 추정
-        params = np.linalg.lstsq(A, B, rcond=None)[0]
-        a, b, c, d, e, f = params
-
-        # 3x3 아핀 변환 행렬 구성
-        self.affine_mat = np.array([
-            [a, b, c],
-            [d, e, f],
-            [0, 0, 1]
-        ])
+        return round(plc_vec[0][0][0]), round(plc_vec[0][0][1])
 
     def calculate_homography_matrix(self, mapping_items):
         mapping_items = {
@@ -114,8 +81,9 @@ class PlcController:
         src_pts = np.array(mapping_items['Pixel'], dtype=np.float32)
         dst_pts = np.array(mapping_items['PLC'], dtype=np.float32)
 
-        # OpenCV로 호모그래피 계산 (RANSAC 알고리즘 적용)
-        H, _ = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+        # 호모그래피 계산 (RANSAC 알고리즘 적용)
+        # 2.0~5.0 사이에서 최적 값 실험
+        H, _ = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 3.0)
         self.homography_mat = H
 
     def plc_control(self, address, mode):
