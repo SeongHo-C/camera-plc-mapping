@@ -1,4 +1,5 @@
 import time
+import cv2
 import numpy as np
 from pyModbusTCP.client import ModbusClient
 
@@ -70,13 +71,11 @@ class PlcController:
         # pixel_vec = np.array([x, y, 1], dtype=np.int64)
         # plc_vec = self.affine_mat @ pixel_vec
 
-        # 호모그래피 변환 행렬
-        pixel_vec = np.array([x, y, 1], dtype=np.int64)
-        plc_vec = self.homography_mat @ pixel_vec
+        pixel_vec = np.array([x, y], dtype=np.float32).reshape(1, 1, 2)
+        # OpenCV perspectiveTransform 사용
+        plc_vec = cv2.perspectiveTransform(pixel_vec, self.homography_mat)
 
-        # 동차 좌표 정규화
-        plc_vec /= plc_vec[2]
-        return round(plc_vec[0]), round(plc_vec[1])
+        return int(plc_vec[0][0][0]), int(plc_vec[0][0][1])
 
     def calculate_affine_matrix(self, mapping_items):
         converted = {key: [tuple(coord) for coord in coords] for key, coords in mapping_items.items()}
@@ -107,29 +106,17 @@ class PlcController:
         ])
 
     def calculate_homography_matrix(self, mapping_items):
-        converted = {key: [tuple(coord) for coord in coords] for key, coords in mapping_items.items()}
-        # pixel_pts = converted['Pixel']
-        # plc_pts = converted['PLC']
+        mapping_items = {
+            'Pixel': [[111, 38], [582, 48], [73, 434], [619, 460], [192, 105], [499, 114], [177, 344], [510, 354], [268, 161], [419, 167], [262, 277], [423, 283]],
+            'PLC': [[7400, 4000], [2600, 4000], [7400, 400], [2600, 400], [6600, 3400], [3400, 3400], [6600, 1000], [3400, 1000], [5800, 2800], [4200, 2800], [5800, 1600], [4200, 1600]]
+        }
 
-        pixel_pts = [(111, 38), (582, 48), (73, 434), (619, 460), (192, 105),
-                     (499, 114), (177, 344), (510, 354), (268, 161), (419, 167), (262, 277), (423, 283)]
-        plc_pts = [(7400, 4000), (2600, 4000), (7400, 400), (2600, 400),
-                   (6600, 3400), (3400, 3400), (6600, 1000), (3400, 1000), (5800, 2800), (4200, 2800), (5800, 1600), (4200, 1600)]
+        src_pts = np.array(mapping_items['Pixel'], dtype=np.float32)
+        dst_pts = np.array(mapping_items['PLC'], dtype=np.float32)
 
-        # 호모그래피 행렬 계산을 위한 방정식 구성
-        A = []
-        for (x, y), (X, Y) in zip(pixel_pts, plc_pts):
-            A.append([x, y, 1, 0, 0, 0, -X*x, -X*y, -X])
-            A.append([0, 0, 0, x, y, 1, -Y*x, -Y*y, -Y])
-
-        A = np.array(A)
-
-        # SVD를 이용한 최소제곱해 계산
-        _, _, V = np.linalg.svd(A)
-        H = V[-1, :].reshape((3, 3))
-
-        # 정규화 (H[2,2] = 1)
-        self.homography_mat = H / H[2, 2]
+        # OpenCV로 호모그래피 계산 (RANSAC 알고리즘 적용)
+        H, _ = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+        self.homography_mat = H
 
     def plc_control(self, address, mode):
         # if self.client.write_single_register(address, mode):
