@@ -10,13 +10,13 @@ section {
 
 main {
     display: flex;
+
+    margin-bottom: 20px;
 }
 
 .left {
     display: flex;
     flex-direction: column;
-
-    height: 550px;
 }
 
 .fps {
@@ -26,8 +26,8 @@ main {
 }
 
 .camera_container {
-    width: 660px;
-    height: 500px;
+    width: 820px;
+    height: 620px;
 
     display: flex;
     justify-content: center;
@@ -42,20 +42,18 @@ main {
 }
 
 .right {
-    width: 660px;
-    height: 500px;
+    width: 600px;
 
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-
-    position: relative;
 }
 
 .target_container > .title {
     font-size: 18px;
     font-weight: bold;
+    margin-bottom: 10px;
 }
 
 .target {
@@ -68,7 +66,6 @@ main {
 
     border: 2px solid gray;
     position: relative;
-    margin-top: 10px;
 }
 
 .LT {
@@ -87,7 +84,7 @@ main {
 
     position: absolute;
     gap: 5px;
-    left: calc(400px - 5.5rem - 10px);
+    right: 5px;
     top: 5px;
 }
 
@@ -97,7 +94,7 @@ main {
 
     position: absolute;
     gap: 5px;
-    top: calc(250px - 4rem - 15px);
+    bottom: 5px;
     left: 5px;
 }
 
@@ -107,8 +104,8 @@ main {
 
     position: absolute;
     gap: 5px;
-    left: calc(400px - 5.5rem - 10px);
-    top:calc(250px - 4rem - 15px)
+    right: 5px;
+    bottom: 5px;
 }
 
 .center {
@@ -127,7 +124,8 @@ main {
     border-radius: 50%;
 }
 
-.target_input {
+.target_input, 
+.target_change_input {
     width: 5.5rem;
     height: 2rem;
 
@@ -143,6 +141,7 @@ main {
     align-items: center;
 
     font-size: 18px;
+    margin-top: 10px;
 }
 
 .target_change > div {
@@ -155,10 +154,11 @@ main {
 .range, .unit {
     display: flex;
     justify-content: space-between;
-        
-    margin-top: 15px;
 }
 
+.unit {
+    margin-top: 10px;
+}
 
 
 .target_change > button {
@@ -194,7 +194,7 @@ main {
     width: 400px;
 
     display: flex;
-    align-items: center;
+    align-items: center;    
 }
 
 .manual > div {
@@ -250,7 +250,7 @@ main {
 }
 
 .mapping {
-    width: 1320px;
+    width: 1420px;
 
     border: 3px solid gray;
     border-radius: 10px;
@@ -290,7 +290,7 @@ main {
 }
 
 .control {
-    width: 1320px;
+    width: 1420px;
 
     border: 3px solid gray;
     border-radius: 10px;
@@ -342,13 +342,14 @@ main {
 }
 
 .log_container {
-    width: 350px;
-    height: 530px;
+    width: 400px;
+    height: 155px;
 
-    border: 3px solid gray;
-    border-radius: 5px;
-    position: absolute;
-    right: -350px;
+    border: 2px solid gray;
     padding: 0 10px;
     overflow-y: auto;
+}
+
+.log_container p {
+    margin: 5px 0;
 }

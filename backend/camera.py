@@ -17,8 +17,8 @@ class Camera:
             if not self.camera.isOpened():
                 raise RuntimeError('카메라를 열 수 없습니다.')
 
-            self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-            self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+            self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 800)
+            self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)
             self.camera.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
             self.camera.set(cv2.CAP_PROP_FPS, 60)
 

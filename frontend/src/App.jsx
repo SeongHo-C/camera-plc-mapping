@@ -216,7 +216,9 @@ export default function App() {
         </div>
         <div className={styles.right}>
           <div className={styles.target_container}>
-            <span className={styles.title}>표적지</span>
+            <div className={styles.title}>
+              <span>표적지</span>
+            </div>
             <div className={styles.target}>
               <div className={styles.LT}>
                 <input className={styles.target_input} type="number" name="LT_x" value={corner.LT.x} onChange={handleCornerCoordinate} />
@@ -244,13 +246,13 @@ export default function App() {
               <div>
                 <div className={styles.range}>
                   <span>상하:</span>
-                  <input className={styles.target_input} type="number" name="x" value={range.x} onChange={handleRange} />
+                  <input className={styles.target_change_input} type="number" name="x" value={range.x} onChange={handleRange} />
                   <span>좌우:</span>
-                  <input className={styles.target_input} type="number" name="y" value={range.y} onChange={handleRange} />
+                  <input className={styles.target_change_input} type="number" name="y" value={range.y} onChange={handleRange} />
                 </div>
                 <div className={styles.unit}>
                   <span>단위:</span>
-                  <input className={styles.target_input} type="number" value={unit} onChange={handleUnit}/>
+                  <input className={styles.target_change_input} type="number" value={unit} onChange={handleUnit}/>
                   <select className={styles.unit_select} onChange={handleRatioCoordinates}>
                     {[0, 1, 2, 3, 4, 5].map((num) => <option key={num} value={unit * num}>{unit * num}</option>)}
                   </select>
