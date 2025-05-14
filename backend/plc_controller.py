@@ -82,9 +82,33 @@ class PlcController:
         dst_pts = np.array(mapping_items['PLC'], dtype=np.float32)
 
         # 호모그래피 계산 (RANSAC 알고리즘 적용)
-        # 2.0~5.0 사이에서 최적 값 실험
-        H, _ = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 3.0)
+        # 임계값 2.0~5.0 사이에서 최적 값 실험
+        H, status = cv2.findHomography(
+            src_pts, dst_pts,
+            method=cv2.RANSAC,
+            ransacReprojThreshold=3.0,
+            maxIters=2000,
+            confidence=0.995
+        )
+
+        # 인라이어 비율 확인 (품질 체크)
+        inlier_ratio = np.sum(status) / len(status)
+        print(f'인라이어 비율: {inlier_ratio:.2f}')
+
+        if inlier_ratio > 0.7:
+            inliers_src = src_pts[status.ravel() == 1]
+            inliers_dst = dst_pts[status.ravel() == 1]
+
+            # 인라이어만으로 정밀 호모그래피 계산
+            H_refined, _ = cv2.findHomography(
+                inliers_src, inliers_dst,
+                method=cv2.LMEDS
+            )
+            self.homography_mat = H_refined
+            return True
+
         self.homography_mat = H
+        return True
 
     def plc_control(self, address, mode):
         # if self.client.write_single_register(address, mode):
