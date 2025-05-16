@@ -67,6 +67,12 @@ class WebsocketServer:
                     'type': 'message',
                     'message': '아핀 변환 행렬 구성'
                 }))
+            elif command_action == 'validation':
+                max_error, avg_error = self.plc_controller.validate_mapping()
+                await websocket.send(json.dumps({
+                    'type': 'message',
+                    'message': f'최대 오차: {max_error}, 평균 오차: {avg_error}'
+                }))
 
         elif command_type == 'control':
             if command_action == 'shootMode':

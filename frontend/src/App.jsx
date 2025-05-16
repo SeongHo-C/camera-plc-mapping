@@ -144,10 +144,14 @@ export default function App() {
     ws.send(JSON.stringify({ type: 'camera', action: 'capture' }));
   }
 
+  const handleValidation = () => {
+    ws.send(JSON.stringify({ type: 'mapping', action: 'validation' }));
+  }
+
   const handleTest = () => {
     ws.send(JSON.stringify({ type: 'shoot', action: 'manual', data: { 'mode': 'test', 'x': center.x, 'y': center.y } }));
   }
-
+  
   useEffect(() => {
     const socket = new WebSocket('ws://localhost:8765');
     socket.binaryType = 'arraybuffer';
@@ -315,6 +319,7 @@ export default function App() {
           <button className={`${laserMode === 0 ? styles.off : styles.on}`} onClick={handleLaserMode}>레이저</button>
           <button className={styles.control_button} onClick={handleCenterShoot}>원점</button>
           <button className={styles.control_button} onClick={handleCapture}>캡처</button>
+          <button className={styles.control_button} onClick={handleValidation}>검증</button>
           <button className={styles.control_button} onClick={handleTest}>테스트</button>
         </div>
       </footer>

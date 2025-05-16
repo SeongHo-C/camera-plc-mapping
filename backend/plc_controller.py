@@ -72,13 +72,13 @@ class PlcController:
         return round(plc_vec[0][0][0]), round(plc_vec[0][0][1])
 
     def calculate_homography_matrix(self, mapping_items):
-        src_pts = np.array(mapping_items['Pixel'], dtype=np.float32)
-        dst_pts = np.array(mapping_items['PLC'], dtype=np.float32)
+        self.src_pts = np.array(mapping_items['Pixel'], dtype=np.float32)
+        self.dst_pts = np.array(mapping_items['PLC'], dtype=np.float32)
 
         # 호모그래피 계산 (RANSAC 알고리즘 적용)
         # 임계값 1.0~5.0 사이에서 최적 값 실험
         H, status = cv2.findHomography(
-            src_pts, dst_pts,
+            self.src_pts, self.dst_pts,
             method=cv2.RANSAC,
             ransacReprojThreshold=3.0,
             maxIters=2000,
@@ -90,8 +90,8 @@ class PlcController:
         print(f'인라이어 비율: {inlier_ratio:.2f}')
 
         if inlier_ratio >= 0.5:
-            inliers_src = src_pts[status.ravel() == 1]
-            inliers_dst = dst_pts[status.ravel() == 1]
+            inliers_src = self.src_pts[status.ravel() == 1]
+            inliers_dst = self.dst_pts[status.ravel() == 1]
 
             # 인라이어만으로 정밀 호모그래피 계산
             H_refined, _ = cv2.findHomography(
@@ -110,3 +110,32 @@ class PlcController:
         # else:
         #     print(f'{address} 주소 쓰기 실패')
         print(f'{address} 주소 쓰기 성공: {mode}')
+
+    def validate_mapping(self):
+        errors = []
+
+        for pixel, plc in zip(self.src_pts, self.dst_pts):
+            converted = self.pixel_to_plc(pixel[0], pixel[1])
+
+            error = np.linalg.norm(np.array(plc) - np.array(converted))
+            errors.append(error)
+
+            print(f'픽셀 {pixel} → PLC {converted} | 오차: {error:.2f}')
+
+        return round(max(errors), 2), round(np.mean(errors), 2)
+
+    # 벡터화 연산으로 속도 향상 (약 10배 빠름)
+    # def validate_mapping_fast(self):
+    #     src_arr = np.array(self.src_pts)
+    #     dst_arr = np.array(self.dst_pts)
+
+    #     # 일괄 변환
+    #     converted = cv2.perspectiveTransform(
+    #         src_arr.reshape(-1, 1, 2).astype(np.float32),
+    #         self.homography_mat
+    #     )[:, 0, :]
+
+    #     errors = np.linalg.norm(dst_arr - converted, axis=1)
+
+    #     print(f"최대 오차: {errors.max():.2f}")
+    #     print(f"평균 오차: {errors.mean():.2f}")
