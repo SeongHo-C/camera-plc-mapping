@@ -291,7 +291,7 @@ export default function App() {
               <button onClick={handleMapping}>매핑하기</button>
             </div>
           </div>
-          <div>
+          <div className={styles.mapping_points}>
             <MappingPoints title="PLC" mappingItem={mappingItems.PLC} onMappingItems={handleMappingItems} />
             <MappingPoints title="Pixel" mappingItem={mappingItems.Pixel} onMappingItems={handleMappingItems}/>
           </div>
@@ -317,6 +317,6 @@ const defaultCorner = {
   'RB': { 'x': defaultCenter.x - defaultRange.x, 'y': defaultCenter.y - defaultRange.y  },
 };
 const defaultMappingItems = {
-  'PLC': [[0, 0], [0, 0], [0, 0], [0, 0]],
-  'Pixel': [[0, 0], [0, 0], [0, 0], [0, 0]]
+  'PLC': [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
+  'Pixel': [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
 }

@@ -289,6 +289,10 @@ main {
     color: #fff;
 }
 
+.mapping_points {
+    overflow-x: scroll;
+}
+
 .control {
     width: 1420px;
 

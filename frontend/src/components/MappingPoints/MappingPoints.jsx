@@ -4,7 +4,8 @@ import styles from './MappingPoints.module.css'
 export default function MappingPoints({title, mappingItem, onMappingItems}) {
     return (
         <div className={styles.mapping_container}>
-            <span className={styles.title}>{title}</span>
+            <div className={styles.title}>{title}</div>
+            <div className={styles.mapping_input}>
             {
                 mappingItem.map((coordinate, idx) => (
                     <div key={`${title}_${idx}`}>
@@ -12,7 +13,8 @@ export default function MappingPoints({title, mappingItem, onMappingItems}) {
                         <input className={styles.coordinate_input} type="number" name={`${title}_${idx}_1`} value={coordinate[1]} onChange={onMappingItems} />
                     </div>
                 ))
-            }
+                }
+            </div>
         </div>
     );
 }

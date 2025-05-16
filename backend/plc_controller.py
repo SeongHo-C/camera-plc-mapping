@@ -73,29 +73,29 @@ class PlcController:
         return round(plc_vec[0][0][0]), round(plc_vec[0][0][1])
 
     def calculate_homography_matrix(self, mapping_items):
-        mapping_items = {
-            'Pixel': [[111, 38], [582, 48], [73, 434], [619, 460], [192, 105], [499, 114], [177, 344], [510, 354], [268, 161], [419, 167], [262, 277], [423, 283]],
-            'PLC': [[7400, 4000], [2600, 4000], [7400, 400], [2600, 400], [6600, 3400], [3400, 3400], [6600, 1000], [3400, 1000], [5800, 2800], [4200, 2800], [5800, 1600], [4200, 1600]]
-        }
+        # mapping_items = {
+        #     'Pixel': [[111, 38], [582, 48], [73, 434], [619, 460], [192, 105], [499, 114], [177, 344], [510, 354], [268, 161], [419, 167], [262, 277], [423, 283]],
+        #     'PLC': [[7400, 4000], [2600, 4000], [7400, 400], [2600, 400], [6600, 3400], [3400, 3400], [6600, 1000], [3400, 1000], [5800, 2800], [4200, 2800], [5800, 1600], [4200, 1600]]
+        # }
 
         src_pts = np.array(mapping_items['Pixel'], dtype=np.float32)
         dst_pts = np.array(mapping_items['PLC'], dtype=np.float32)
 
         # 호모그래피 계산 (RANSAC 알고리즘 적용)
-        # 임계값 2.0~5.0 사이에서 최적 값 실험
+        # 임계값 1.0~5.0 사이에서 최적 값 실험
         H, status = cv2.findHomography(
             src_pts, dst_pts,
             method=cv2.RANSAC,
             ransacReprojThreshold=3.0,
             maxIters=2000,
-            confidence=0.995
+            confidence=0.95
         )
 
         # 인라이어 비율 확인 (품질 체크)
         inlier_ratio = np.sum(status) / len(status)
         print(f'인라이어 비율: {inlier_ratio:.2f}')
 
-        if inlier_ratio > 0.7:
+        if inlier_ratio >= 0.5:
             inliers_src = src_pts[status.ravel() == 1]
             inliers_dst = dst_pts[status.ravel() == 1]
 
