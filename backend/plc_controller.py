@@ -11,7 +11,6 @@ class PlcController:
         if self.client.open():
             if self.client.write_single_register(1800, 0):  # 발사
                 print('발사 허용 안함 쓰기 성공')
-                time.sleep(0.05)
             else:
                 print('발사 허용 안함 쓰기 실패')
 
@@ -73,11 +72,6 @@ class PlcController:
         return round(plc_vec[0][0][0]), round(plc_vec[0][0][1])
 
     def calculate_homography_matrix(self, mapping_items):
-        # mapping_items = {
-        #     'Pixel': [[111, 38], [582, 48], [73, 434], [619, 460], [192, 105], [499, 114], [177, 344], [510, 354], [268, 161], [419, 167], [262, 277], [423, 283]],
-        #     'PLC': [[7400, 4000], [2600, 4000], [7400, 400], [2600, 400], [6600, 3400], [3400, 3400], [6600, 1000], [3400, 1000], [5800, 2800], [4200, 2800], [5800, 1600], [4200, 1600]]
-        # }
-
         src_pts = np.array(mapping_items['Pixel'], dtype=np.float32)
         dst_pts = np.array(mapping_items['PLC'], dtype=np.float32)
 

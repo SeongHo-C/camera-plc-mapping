@@ -31,7 +31,21 @@ export default function App() {
   }
 
   const handleContinuousShoot = () => {
-    ws.send(JSON.stringify({ type: 'shoot', action: 'continuous', data: Object.values(corner) }));    
+    const corners = Object.values(corner);
+    const targets = Object.values(corner);
+
+    corners.forEach((_, idx) => {
+      const next = (idx + 1) % 4;
+      targets.splice(
+        2 * idx + 1, 0,
+        {
+          'x': (corners[idx].x + corners[next].x) / 2, 
+          'y': (corners[idx].y + corners[next].y) / 2
+        }
+      )
+    })
+
+    ws.send(JSON.stringify({ type: 'shoot', action: 'continuous', data: targets }));    
   }
 
   const handleCenterCoordinate = (e) => {
@@ -54,8 +68,8 @@ export default function App() {
     const newCornerCoordinate = {
       'LT': { 'x': center.x + range.x, 'y': center.y + range.y },
       'RT': { 'x': center.x - range.x, 'y': center.y + range.y },
-      'LB': { 'x': center.x + range.x, 'y': center.y - range.y },
       'RB': { 'x': center.x - range.x, 'y': center.y - range.y },
+      'LB': { 'x': center.x + range.x, 'y': center.y - range.y },
     }
     
     setCorner(newCornerCoordinate)
@@ -79,8 +93,8 @@ export default function App() {
     const newCornerCoordinate = {
       'LT': { 'x': center.x + ratioX, 'y': center.y + ratioY },
       'RT': { 'x': center.x - ratioX, 'y': center.y + ratioY },
-      'LB': { 'x': center.x + ratioX, 'y': center.y - ratioY },
       'RB': { 'x': center.x - ratioX, 'y': center.y - ratioY },
+      'LB': { 'x': center.x + ratioX, 'y': center.y - ratioY },
     };
     
     setCorner(newCornerCoordinate);
@@ -228,13 +242,13 @@ export default function App() {
                 <input className={styles.target_input} type="number" name="RT_x" value={corner.RT.x} onChange={handleCornerCoordinate} />
                 <input className={styles.target_input} type="number" name="RT_y" value={corner.RT.y} onChange={handleCornerCoordinate} />
               </div>
-              <div className={styles.LB}>
-                <input className={styles.target_input} type="number" name="LB_x" value={corner.LB.x} onChange={handleCornerCoordinate} />
-                <input className={styles.target_input} type="number" name="LB_y" value={corner.LB.y} onChange={handleCornerCoordinate} />
-              </div>
               <div className={styles.RB}>
                 <input className={styles.target_input} type="number" name="RB_x" value={corner.RB.x} onChange={handleCornerCoordinate} />
                 <input className={styles.target_input} type="number" name="RB_y" value={corner.RB.y} onChange={handleCornerCoordinate} />
+              </div>
+              <div className={styles.LB}>
+                <input className={styles.target_input} type="number" name="LB_x" value={corner.LB.x} onChange={handleCornerCoordinate} />
+                <input className={styles.target_input} type="number" name="LB_y" value={corner.LB.y} onChange={handleCornerCoordinate} />
               </div>
               <div className={styles.dot} />
               <div className={styles.center}>
@@ -313,8 +327,8 @@ const defaultCenter = { 'x': 5000, 'y': 2500 };
 const defaultCorner = {
   'LT': { 'x': defaultCenter.x + defaultRange.x, 'y': defaultCenter.y + defaultRange.y },
   'RT': { 'x': defaultCenter.x - defaultRange.x, 'y': defaultCenter.y + defaultRange.y },
-  'LB': { 'x': defaultCenter.x + defaultRange.x, 'y': defaultCenter.y - defaultRange.y  },
   'RB': { 'x': defaultCenter.x - defaultRange.x, 'y': defaultCenter.y - defaultRange.y  },
+  'LB': { 'x': defaultCenter.x + defaultRange.x, 'y': defaultCenter.y - defaultRange.y  },
 };
 const defaultMappingItems = {
   'PLC': [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
