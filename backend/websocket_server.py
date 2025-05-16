@@ -42,10 +42,10 @@ class WebsocketServer:
                     'message': f'수동 사격 완료: ({plc_x}, {plc_y})'
                 }))
             elif command_action == 'continuous':
-                self.plc_controller.continuous_shoot(command_data)
+                targets = self.plc_controller.continuous_shoot(command_data)
                 await websocket.send(json.dumps({
                     'type': 'message',
-                    'message': '연속 사격 완료'
+                    'message': f'연속 사격 완료: {targets}'
                 }))
 
         elif command_type == 'mapping':

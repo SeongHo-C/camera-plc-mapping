@@ -51,6 +51,8 @@ class PlcController:
             return x, y
 
     def continuous_shoot(self, corner):
+        targets = list()
+
         for coordinate in corner:
             x = int(coordinate['x'])
             y = int(coordinate['y'])
@@ -63,7 +65,10 @@ class PlcController:
                 print(f'PLC 좌표 쓰기 실패: {x}, {y}')
             """
             print(f'PLC 좌표 쓰기 성공: {x}, {y}')
+            targets.append((x, y))
             time.sleep(2)
+
+        return tuple(targets)
 
     def pixel_to_plc(self, x, y):
         pixel_vec = np.array([x, y], dtype=np.float32).reshape(1, 1, 2)
