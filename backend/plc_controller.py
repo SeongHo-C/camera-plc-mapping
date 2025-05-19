@@ -85,29 +85,35 @@ class PlcController:
         H, status = cv2.findHomography(
             self.src_pts, self.dst_pts,
             method=cv2.RANSAC,
-            ransacReprojThreshold=3.0,
-            maxIters=2000,
-            confidence=0.95
+            ransacReprojThreshold=1.5,
+            maxIters=5000,
+            confidence=0.99
         )
 
         # 인라이어 비율 확인 (품질 체크)
         inlier_ratio = np.sum(status) / len(status)
         print(f'인라이어 비율: {inlier_ratio:.2f}')
 
-        if inlier_ratio >= 0.5:
-            inliers_src = self.src_pts[status.ravel() == 1]
-            inliers_dst = self.dst_pts[status.ravel() == 1]
+        inliers_src = self.src_pts[status.ravel() == 1]
+        inliers_dst = self.dst_pts[status.ravel() == 1]
 
+        if len(inliers_src) >= 4:
             # 인라이어만으로 정밀 호모그래피 계산
-            H_refined, _ = cv2.findHomography(
+            H_refined, status_refined = cv2.findHomography(
                 inliers_src, inliers_dst,
-                method=cv2.LMEDS
+                method=cv2.USAC_MAGSAC,
+                ransacReprojThreshold=0.5,
+                maxIters=10000,
+                confidence=0.999,
             )
-            self.homography_mat = H_refined
-            return True
 
-        self.homography_mat = H
-        return True
+            if H_refined is not None:
+                self.homography_mat = H_refined
+            else:
+                self.homography_mat = H
+        else:
+            print('경고: 인라이어 부족으로 초기 호모그래피 사용')
+            self.homography_mat = H
 
     def plc_control(self, address, mode):
         # if self.client.write_single_register(address, mode):
