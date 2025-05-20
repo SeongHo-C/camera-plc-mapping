@@ -16,8 +16,8 @@ class Camera:
 
     def initialize(self):
         try:
-            # self.camera = cv2.VideoCapture(0, cv2.CAP_V4L2)
-            self.camera = cv2.VideoCapture('../giant.mp4')
+            self.camera = cv2.VideoCapture(0, cv2.CAP_V4L2)
+            # self.camera = cv2.VideoCapture('../giant.mp4')
 
             if not self.camera.isOpened():
                 raise RuntimeError('카메라를 열 수 없습니다.')
@@ -25,7 +25,7 @@ class Camera:
             self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 800)
             self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)
             self.camera.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
-            self.camera.set(cv2.CAP_PROP_FPS, 60)
+            self.camera.set(cv2.CAP_PROP_FPS, 90)
 
             return True
         except Exception as e:
@@ -33,29 +33,33 @@ class Camera:
             return False
 
     async def streaming(self, websocket):
-        # loop = asyncio.get_event_loop()
+        loop = asyncio.get_event_loop()
 
         while True:
             try:
                 ret, frame = self.camera.read()
                 # frame = cv2.flip(frame, -1)
 
-                if ret:
-                    self.last_frame = self.detector.detect(frame) if self.detect_mode == 1 else frame
+                if not ret:
+                    continue
 
-                    # YOLO 추론을 별도 스레드에서 비동기 실행
-                    # annotated_frame = await loop.run_in_executor(
-                    #     None,
-                    #     self.detector.detect,
-                    #     frame
-                    # )
+                if self.detect_mode == 1:
+                    # 별도 스레드에서 YOLO 추론 실행
+                    annotated_frame = await loop.run_in_executor(
+                        None,
+                        self.detector.detect,
+                        frame
+                    )
+                    self.last_frame = annotated_frame
+                else:
+                    self.last_frame = frame
 
-                    # 프레임을 JPEG로 인코딩한 뒤 바이너리로 전송
-                    _, buffer = cv2.imencode('.jpg', self.last_frame)
-                    await websocket.send(buffer.tobytes())
+                # 프레임을 JPEG로 인코딩한 뒤 바이너리로 전송
+                _, buffer = cv2.imencode('.jpg', self.last_frame)
+                await websocket.send(buffer.tobytes())
 
-                    # 프레임 전송 속도 조절
-                    await asyncio.sleep(0.01667)
+                # 프레임 전송 속도 조절
+                await asyncio.sleep(1 / 90)
             except websockets.exceptions.ConnectionClosed:
                 break
             except Exception as e:
