@@ -3,16 +3,20 @@ import websockets
 import asyncio
 import os
 import datetime
+from detection import Detection
 
 
 class Camera:
     def __init__(self):
+        self.detector = Detection()
+
         self.camera = None
         self.last_frame = None
 
     def initialize(self):
         try:
-            self.camera = cv2.VideoCapture(0, cv2.CAP_V4L2)
+            # self.camera = cv2.VideoCapture(0, cv2.CAP_V4L2)
+            self.camera = cv2.VideoCapture('../giant.mp4')
 
             if not self.camera.isOpened():
                 raise RuntimeError('카메라를 열 수 없습니다.')
@@ -28,6 +32,8 @@ class Camera:
             return False
 
     async def streaming(self, websocket):
+        # loop = asyncio.get_event_loop()
+
         while True:
             try:
                 ret, frame = self.camera.read()
@@ -35,12 +41,21 @@ class Camera:
 
                 if ret:
                     self.last_frame = frame
+                    annotated_frame = self.detector.detect(frame)
+
+                    # YOLO 추론을 별도 스레드에서 비동기 실행
+                    # annotated_frame = await loop.run_in_executor(
+                    #     None,
+                    #     self.detector.detect,
+                    #     frame
+                    # )
+
                     # 프레임을 JPEG로 인코딩한 뒤 바이너리로 전송
-                    _, buffer = cv2.imencode('.jpg', frame)
+                    _, buffer = cv2.imencode('.jpg', annotated_frame)
                     await websocket.send(buffer.tobytes())
 
-                # 프레임 전송 속도 조절
-                await asyncio.sleep(0.01667)
+                    # 프레임 전송 속도 조절
+                    await asyncio.sleep(0.01667)
             except websockets.exceptions.ConnectionClosed:
                 break
             except Exception as e:
