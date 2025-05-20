@@ -85,7 +85,7 @@ class PlcController:
         H, status = cv2.findHomography(
             self.src_pts, self.dst_pts,
             method=cv2.RANSAC,
-            ransacReprojThreshold=1.5,
+            ransacReprojThreshold=5.0,
             maxIters=5000,
             confidence=0.99
         )
@@ -99,20 +99,15 @@ class PlcController:
 
         if len(inliers_src) >= 4:
             # 인라이어만으로 정밀 호모그래피 계산
-            H_refined, status_refined = cv2.findHomography(
+            H_refined, _ = cv2.findHomography(
                 inliers_src, inliers_dst,
                 method=cv2.USAC_MAGSAC,
-                ransacReprojThreshold=0.5,
+                ransacReprojThreshold=2.5,
                 maxIters=10000,
-                confidence=0.999,
+                confidence=0.999
             )
-
-            if H_refined is not None:
-                self.homography_mat = H_refined
-            else:
-                self.homography_mat = H
+            self.homography_mat = H_refined if H_refined is not None else H
         else:
-            print('경고: 인라이어 부족으로 초기 호모그래피 사용')
             self.homography_mat = H
 
     def plc_control(self, address, mode):
@@ -134,19 +129,3 @@ class PlcController:
             print(f'픽셀 {pixel} → PLC {converted} | 오차: {error:.2f}')
 
         return round(max(errors), 2), round(np.mean(errors), 2)
-
-    # 벡터화 연산으로 속도 향상 (약 10배 빠름)
-    # def validate_mapping_fast(self):
-    #     src_arr = np.array(self.src_pts)
-    #     dst_arr = np.array(self.dst_pts)
-
-    #     # 일괄 변환
-    #     converted = cv2.perspectiveTransform(
-    #         src_arr.reshape(-1, 1, 2).astype(np.float32),
-    #         self.homography_mat
-    #     )[:, 0, :]
-
-    #     errors = np.linalg.norm(dst_arr - converted, axis=1)
-
-    #     print(f"최대 오차: {errors.max():.2f}")
-    #     print(f"평균 오차: {errors.mean():.2f}")
