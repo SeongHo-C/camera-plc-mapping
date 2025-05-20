@@ -11,6 +11,7 @@ export default function App() {
   const [corner, setCorner] = useState(defaultCorner);
   const [mappingItems, setMappingItems] = useState(defaultMappingItems);
   const [unit, setUnit] = useState(0);
+  const [detectMode, setDetectMode] = useState(0);
   const [shootMode, setShootMode] = useState(0);
   const [laserMode, setLaserMode] = useState(0);
   const [logs, setLogs] = useState([]);
@@ -122,6 +123,12 @@ export default function App() {
 
   const handleMapping = () => {
     ws.send(JSON.stringify({ type: 'mapping', action: 'mapping', data: mappingItems }));
+  }
+
+  const handleDetectMode = () => {
+    const mode = detectMode === 0 ? 1 : 0;
+    ws.send(JSON.stringify({ type: 'control', action: 'detectMode', data: mode }));
+    setDetectMode(mode);
   }
 
   const handleShootMode = () => {
@@ -315,6 +322,7 @@ export default function App() {
           </div>
         </div>
         <div className={styles.control}>
+          <button className={`${detectMode === 0 ? styles.off : styles.on}`} onClick={handleDetectMode}>인식</button>
           <button className={`${shootMode === 0 ? styles.off : styles.on}`} onClick={handleShootMode}>사격</button>
           <button className={`${laserMode === 0 ? styles.off : styles.on}`} onClick={handleLaserMode}>레이저</button>
           <button className={styles.control_button} onClick={handleCenterShoot}>원점</button>

@@ -12,6 +12,7 @@ class Camera:
 
         self.camera = None
         self.last_frame = None
+        self.detect_mode = 0
 
     def initialize(self):
         try:
@@ -40,8 +41,7 @@ class Camera:
                 # frame = cv2.flip(frame, -1)
 
                 if ret:
-                    self.last_frame = frame
-                    annotated_frame = self.detector.detect(frame)
+                    self.last_frame = self.detector.detect(frame) if self.detect_mode == 1 else frame
 
                     # YOLO 추론을 별도 스레드에서 비동기 실행
                     # annotated_frame = await loop.run_in_executor(
@@ -51,7 +51,7 @@ class Camera:
                     # )
 
                     # 프레임을 JPEG로 인코딩한 뒤 바이너리로 전송
-                    _, buffer = cv2.imencode('.jpg', annotated_frame)
+                    _, buffer = cv2.imencode('.jpg', self.last_frame)
                     await websocket.send(buffer.tobytes())
 
                     # 프레임 전송 속도 조절

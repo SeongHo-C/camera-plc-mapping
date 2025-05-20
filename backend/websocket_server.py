@@ -87,6 +87,12 @@ class WebsocketServer:
                     'type': 'message',
                     'message': f'현재 레이저 모드: {"ON" if command_data == 1 else "OFF"}'
                 }))
+            elif command_action == 'detectMode':
+                self.camera.detect_mode = command_data
+                await websocket.send(json.dumps({
+                    'type': 'message',
+                    'message': f'현재 인식 모드: {"ON" if command_data == 1 else "OFF"}'
+                }))
 
     async def handle_connection(self, websocket):
         print('클라이언트 연결 성공')
