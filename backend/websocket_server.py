@@ -82,10 +82,15 @@ class WebsocketServer:
                     'message': f'현재 사격 모드: {"ON" if command_data == 1 else "OFF"}'
                 }))
             elif command_action == 'laserMode':
-                self.plc_controller.plc_control(1805, command_data)
+                mode = command_data['mode']
+                correction_value = command_data['correctionValue']
+
+                self.plc_controller.plc_control(1805, mode)
+                if mode == 1:
+                    self.plc_controller.laser_correction_value = correction_value
                 await websocket.send(json.dumps({
                     'type': 'message',
-                    'message': f'현재 레이저 모드: {"ON" if command_data == 1 else "OFF"}'
+                    'message': f'현재 레이저 모드: {"ON" if mode == 1 else "OFF"}'
                 }))
             elif command_action == 'detectMode':
                 self.camera.detect_mode = command_data

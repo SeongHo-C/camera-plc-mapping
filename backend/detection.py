@@ -22,15 +22,17 @@ class Detection:
         results = self.model.track(
             source=frame,
             tracker='botsort.yaml',
-            conf=0.3,  # 검출 신뢰도 임계값. 높이면 오탐↓, 미탐↑
+            conf=0.2,  # 검출 신뢰도 임계값. 높이면 오탐↓, 미탐↑
             iou=0.5,  # NMS에서 겹침 허용치. 낮추면 중복↓, 높이면 중복↑
             persist=True,
             verbose=False
         )
 
         detections = self.parse_results(results)
-        if self.plc_controller.shootMode == 1:
+        if self.plc_controller.shoot_mode == 1:
             self.control_shoot(detections)
+        elif self.plc_controller.laser_mode == 1:
+            self.control_shoot(detections, self.plc_controller.laser_correction_value)
 
         return results[0].plot()
 
@@ -50,7 +52,7 @@ class Detection:
 
         return detections
 
-    def control_shoot(self, detections):
+    def control_shoot(self, detections, correction_value=0):
         current_time = time.time()
 
         if current_time - self.last_shoot_time < 2:
@@ -73,7 +75,7 @@ class Detection:
             [x_min, y_min, x_max, y_max] = target['bbox']
 
             x_center = int((x_min + x_max) / 2)
-            y_center = int((y_min + y_max) / 2)
+            y_center = int((y_min + y_max) / 2 + correction_value)
 
             self.plc_controller.manual_shoot('Pixel', x_center, y_center)
             self.plc_controller.manual_shoot('Pixel', x_center + 1, y_center)

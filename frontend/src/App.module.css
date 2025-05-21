@@ -125,7 +125,8 @@ main {
 }
 
 .target_input, 
-.target_change_input {
+.target_change_input,
+.laser_input {
     width: 5.5rem;
     height: 2rem;
 

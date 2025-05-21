@@ -15,6 +15,7 @@ export default function App() {
   const [shootMode, setShootMode] = useState(0);
   const [laserMode, setLaserMode] = useState(0);
   const [logs, setLogs] = useState([]);
+  const [laserCorrection, setLaserCorrection] = useState(0)
   
   const modeSelectRef = useRef(null);
   const xInputRef = useRef(null);
@@ -139,7 +140,7 @@ export default function App() {
 
   const handleLaserMode = () => {
     const mode = laserMode === 0 ? 1 : 0;
-    ws.send(JSON.stringify({ type: 'control', action: 'laserMode', data: mode }));
+    ws.send(JSON.stringify({ type: 'control', action: 'laserMode', data: { 'mode': mode, 'correctionValue': laserCorrection } }));
     setLaserMode(mode)
   }
 
@@ -157,6 +158,11 @@ export default function App() {
 
   const handleTest = () => {
     ws.send(JSON.stringify({ type: 'shoot', action: 'manual', data: { 'mode': 'test', 'x': center.x, 'y': center.y } }));
+  }
+
+  const handleLaserCorrection = (e) => {
+    const correctionValue = parseInt(e.target.value);
+    setLaserCorrection(correctionValue);
   }
   
   useEffect(() => {
@@ -324,6 +330,7 @@ export default function App() {
         <div className={styles.control}>
           <button className={`${detectMode === 0 ? styles.off : styles.on}`} onClick={handleDetectMode}>인식</button>
           <button className={`${shootMode === 0 ? styles.off : styles.on}`} onClick={handleShootMode}>사격</button>
+          <input className={styles.laser_input} type="number" name="laser" value={laserCorrection} onChange={handleLaserCorrection} />
           <button className={`${laserMode === 0 ? styles.off : styles.on}`} onClick={handleLaserMode}>레이저</button>
           <button className={styles.control_button} onClick={handleCenterShoot}>원점</button>
           <button className={styles.control_button} onClick={handleCapture}>캡처</button>

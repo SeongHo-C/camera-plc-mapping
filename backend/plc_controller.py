@@ -7,7 +7,9 @@ from pyModbusTCP.client import ModbusClient
 class PlcController:
     def __init__(self):
         # self.client = ModbusClient(host='192.168.1.10', port=502)
-        self.shootMode = 0
+        self.shoot_mode = 0
+        self.laser_mode = 0
+        self.laser_correction_value = 0
 
         # if self.client.open():
         #     if self.client.write_single_register(1800, 0):  # 발사
@@ -118,7 +120,9 @@ class PlcController:
         #     print(f'{address} 주소 쓰기 실패')
 
         if address == 1800:
-            self.shootMode = mode
+            self.shoot_mode = mode
+        elif address == 1805:
+            self.laser_mode = mode
 
         print(f'{address} 주소 쓰기 성공: {mode}')
 
