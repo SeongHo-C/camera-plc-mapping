@@ -8,8 +8,8 @@ from utils import save_json, load_json
 
 class WebsocketServer:
     def __init__(self):
-        self.camera = Camera()
         self.plc_controller = PlcController()
+        self.camera = Camera(self.plc_controller)
 
     async def handle_message(self, websocket, message):
         # 문자열로 된 JSON 데이터를 사전처럼 사용

@@ -7,8 +7,8 @@ from detection import Detection
 
 
 class Camera:
-    def __init__(self):
-        self.detector = Detection()
+    def __init__(self, plc_controller):
+        self.detector = Detection(plc_controller)
 
         self.camera = None
         self.last_frame = None

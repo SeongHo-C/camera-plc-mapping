@@ -6,15 +6,16 @@ from pyModbusTCP.client import ModbusClient
 
 class PlcController:
     def __init__(self):
-        self.client = ModbusClient(host='192.168.1.10', port=502)
+        # self.client = ModbusClient(host='192.168.1.10', port=502)
+        self.shootMode = 0
 
-        if self.client.open():
-            if self.client.write_single_register(1800, 0):  # 발사
-                print('발사 허용 안함 쓰기 성공')
-            else:
-                print('발사 허용 안함 쓰기 실패')
+        # if self.client.open():
+        #     if self.client.write_single_register(1800, 0):  # 발사
+        #         print('발사 허용 안함 쓰기 성공')
+        #     else:
+        #         print('발사 허용 안함 쓰기 실패')
 
-            self.client.write_single_register(1805, 0)  # 레이저
+        #     self.client.write_single_register(1805, 0)  # 레이저
 
     def manual_shoot(self, mode, x, y):
         if mode == 'PLC':
@@ -115,6 +116,10 @@ class PlcController:
         #     print(f'{address} 주소 쓰기 성공: {mode}')
         # else:
         #     print(f'{address} 주소 쓰기 실패')
+
+        if address == 1800:
+            self.shootMode = mode
+
         print(f'{address} 주소 쓰기 성공: {mode}')
 
     def validate_mapping(self):
