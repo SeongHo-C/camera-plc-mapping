@@ -32,3 +32,10 @@ class DepthEstimation:
         if grayscale:
             return np.repeat(depth[..., np.newaxis], 3, axis=-1)
         return (self.cmap(depth)[:, :, :3] * 255)[:, :, ::-1].astype(np.uint8)
+
+    def calibrate_depth_scale(self, depth_map, pole_bbox, pole_distance_cm=80.0):
+        x_min, y_min, x_max, y_max = map(int, pole_bbox)
+        pole_region = depth_map[y_min:y_max, x_min:x_max]
+        ref_depth = pole_region.mean()
+        depth_scale = pole_distance_cm * ref_depth
+        return depth_scale

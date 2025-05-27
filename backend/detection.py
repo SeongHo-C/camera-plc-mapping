@@ -39,57 +39,62 @@ class Detection:
 
         hornet_detected = any(d['cls_id'] in (0, 1) for d in detections)
 
-        depth_map = None
         if hornet_detected:
             depth_map = self.depth_estimator.estimate_depth(frame)
             # self.save_depth_image(depth_map)
+            depth_scale = self.depth_estimator.calibrate_depth_scale(depth_map, (100, 10, 140, 590))
 
-        self.conrol_shooting(detections, depth_map)
-
-        # if self.plc_controller.shoot_mode == 1:
-        #     self.control_shoot(detections)
-        # elif self.plc_controller.laser_mode == 1:
-        #     self.control_shoot(detections, self.plc_controller.laser_correction_value)
+            self.control_shooting(detections, depth_map, depth_scale)
 
         return results[0].plot()
 
-    def control_shooting(self, detections, depth_map):
+    def control_shooting(self, detections, depth_map, depth_scale):
         if self.plc_controller.shoot_mode == 1:
-            self.process_shooting(detections, depth_map)
+            self.process_shooting(detections, depth_map, depth_scale)
         elif self.plc_controller.laser_mode == 1:
             correction = self.plc_controller.laser_correction_value
-            self.process_shooting(detections, depth_map, correction)
+            self.process_shooting(detections, depth_map, depth_scale, correction)
 
-    # def process_shooting(self, detections, depth_map, correction_value=0):
-        # current_time = time.time()
+    def process_shooting(self, detections, depth_map, depth_scale, correction_value=0):
+        current_time = time.time()
 
-        # if current_time - self.last_shoot_time < 2:
-        #     return
+        if current_time - self.last_shoot_time < 3:
+            return
 
-        # classes = {d['cls_id'] for d in detections}
-        # hornets = [
-        #     d for d in detections
-        #     if d['cls_id'] in (0, 1)
-        #     and d['track_id'] is not None
-        #     and d['track_id'] not in self.shoot_track_ids
-        # ]
+        if any(d['cls_id'] == 3 for d in detections):
+            print('안전 조치: 사람이 감지되어 사격을 중단합니다.')
+            return
 
-        # if 3 in classes:
-        #     print('사람이 탐지되었으므로, 사격 중지')
-        #     return
+        valid_targets = [
+            d for d in detections
+            if d['cls_id'] in (0, 1)
+            and d['track_id'] not in self.shoot_track_ids
+        ]
 
-        # if hornets:
-        #     target = min(hornets, key=lambda x: x['track_id'])
-        #     [x_min, y_min, x_max, y_max] = target['bbox']
+        if valid_targets:
+            target = min(valid_targets, key=lambda x: x['track_id'])
+            hornet_distance_cm = self.get_hornet_distance(depth_map, target['bbox'], depth_scale)
+            [x_min, y_min, x_max, y_max] = target['bbox']
 
-        #     x_center = int((x_min + x_max) / 2)
-        #     y_center = int((y_min + y_max) / 2 + correction_value)
+            x_center = int((x_min + x_max) / 2)
+            y_center = int((y_min + y_max) / 2 + correction_value)
 
-        #     self.plc_controller.manual_shoot('Pixel', x_center, y_center)
-        #     self.plc_controller.manual_shoot('Pixel', x_center + 1, y_center)
+            plc_x_1, plc_y_1 = self.plc_controller.manual_shoot('Pixel', x_center, y_center)
+            time.sleep(1)
+            plc_x_2, plc_y_2 = self.plc_controller.manual_shoot('Pixel', x_center, y_center, hornet_distance_cm)
+            time.sleep(1)
+            self.plc_controller.manual_shoot('PLC', int((plc_x_1 + plc_x_2) / 2), int((plc_y_1 + plc_y_2) / 2))
 
-        #     self.shoot_track_ids.add(target['track_id'])
-        #     self.last_shoot_time = current_time
+            self.shoot_track_ids.add(target['track_id'])
+            self.last_shoot_time = current_time
+
+    def get_hornet_distance(self, depth_map, hornet_bbox, depth_scale):
+        x_min, y_min, x_max, y_max = map(int, hornet_bbox)
+        hornet_region = depth_map[y_min:y_max, x_min:x_max]
+        avg_depth = hornet_region.mean()
+        hornet_distance_cm = int(depth_scale / avg_depth)
+        print(hornet_distance_cm)
+        return hornet_distance_cm
 
     def parse_results(self, results):
         return [{
@@ -100,7 +105,7 @@ class Detection:
 
     def save_depth_image(self, depth_map, grayscale=True):
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
-        filename = f'depth_{timestamp}.png'
+        filename = f'depth_{timestamp}.jpg'
         save_path = os.path.join(self.output_dir, filename)
 
         depth_vis = self.depth_estimator.visualize_depth(
