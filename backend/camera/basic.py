@@ -6,7 +6,7 @@ import datetime
 from detection import Detection
 
 
-class Camera:
+class BasicCamera:
     def __init__(self, plc_controller):
         self.detector = Detection(plc_controller)
 
@@ -17,7 +17,6 @@ class Camera:
     def initialize(self):
         try:
             self.camera = cv2.VideoCapture(0, cv2.CAP_V4L2)
-            # self.camera = cv2.VideoCapture('../giant.mp4')
 
             if not self.camera.isOpened():
                 raise RuntimeError('카메라를 열 수 없습니다.')

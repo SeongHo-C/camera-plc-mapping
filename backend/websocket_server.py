@@ -1,7 +1,8 @@
 import websockets
 import asyncio
 import json
-from camera import Camera
+from camera.basic import BasicCamera
+from camera.depth import DepthCamera
 from plc_controller import PlcController
 from utils import save_json, load_json
 
@@ -9,7 +10,7 @@ from utils import save_json, load_json
 class WebsocketServer:
     def __init__(self):
         self.plc_controller = PlcController()
-        self.camera = Camera(self.plc_controller)
+        self.camera = DepthCamera(self.plc_controller)
 
     async def handle_message(self, websocket, message):
         # 문자열로 된 JSON 데이터를 사전처럼 사용
