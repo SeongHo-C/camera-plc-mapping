@@ -3,12 +3,11 @@ import websockets
 import asyncio
 import os
 import datetime
-from detection import Detection
 
 
 class BasicCamera:
-    def __init__(self, plc_controller):
-        self.detector = Detection(plc_controller)
+    def __init__(self, detector):
+        self.detector = detector
 
         self.camera = None
         self.last_frame = None
@@ -47,7 +46,8 @@ class BasicCamera:
                     annotated_frame = await loop.run_in_executor(
                         None,
                         self.detector.detect,
-                        frame
+                        frame,
+                        None
                     )
                     self.last_frame = annotated_frame
                 else:

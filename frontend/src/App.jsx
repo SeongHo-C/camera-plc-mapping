@@ -16,6 +16,7 @@ export default function App() {
   const [laserMode, setLaserMode] = useState(0);
   const [logs, setLogs] = useState([]);
   const [laserCorrection, setLaserCorrection] = useState(0)
+  const [resultImage, setResultImage] = useState(null)
   
   const modeSelectRef = useRef(null);
   const xInputRef = useRef(null);
@@ -23,6 +24,7 @@ export default function App() {
 
   const frameTimesRef = useRef([]);
   const lastFpsUpdateRef = useRef(0);
+  const fileInputRef = useRef(null)
 
   const handleManualShoot = () => {
     const mode = modeSelectRef.current.value;
@@ -164,43 +166,63 @@ export default function App() {
     const correctionValue = parseInt(e.target.value);
     setLaserCorrection(correctionValue);
   }
-  
+
+  const handleUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      ws.send(event.target.result);
+    }
+    reader.readAsArrayBuffer(file)
+  }
+
   useEffect(() => {
     const socket = new WebSocket('ws://localhost:8765');
     socket.binaryType = 'arraybuffer';
     setWs(socket);
 
     let prevUrl = null;
+    let nextBinaryType = null;
 
     socket.onmessage = async (e) => {
       if (e.data instanceof ArrayBuffer) {
-        try {
+        if (nextBinaryType === 'result') {
           const blob = new Blob([e.data], { type: 'image/jpeg' });
           const url = URL.createObjectURL(blob);
-
-          if (prevUrl) {
-            URL.revokeObjectURL(prevUrl);
-          }
-          prevUrl = url;
-          setFrame(url);
-
-          // FPS 계산
-          const now = performance.now();
-          frameTimesRef.current = frameTimesRef.current.filter(t => now - t < 1000);
-          frameTimesRef.current.push(now);
-
-          if (now - lastFpsUpdateRef.current > 200) {
-            setFps(frameTimesRef.current.length);
-            lastFpsUpdateRef.current = now;
-          }
-        } catch (error) {
-          console.error('프레임 처리 중 오류 발생:', error);
-        }                        
+          setResultImage(url)
+        } else {
+          try {
+            const blob = new Blob([e.data], { type: 'image/jpeg' });
+            const url = URL.createObjectURL(blob);
+  
+            if (prevUrl) {
+              URL.revokeObjectURL(prevUrl);
+            }
+            prevUrl = url;
+            setFrame(url);
+  
+            // FPS 계산
+            const now = performance.now();
+            frameTimesRef.current = frameTimesRef.current.filter(t => now - t < 1000);
+            frameTimesRef.current.push(now);
+  
+            if (now - lastFpsUpdateRef.current > 200) {
+              setFps(frameTimesRef.current.length);
+              lastFpsUpdateRef.current = now;
+            }
+          } catch (error) {
+            console.error('프레임 처리 중 오류 발생:', error);
+          }  
+        }
+        nextBinaryType = null;
       } else {
         const message = JSON.parse(e.data);
 
         if (message.type === 'mapping') setMappingItems(message.data);
         else if (message.type === 'message') setLogs(prevLogs => [message.message, ...prevLogs]);
+        else if (message.type === 'result') nextBinaryType = 'result';
       }
     }
 
@@ -242,7 +264,7 @@ export default function App() {
             <span>FPS: {fps}</span>
           </div>
           <div className={styles.camera_container}>
-            {frame && <img className={styles.camera} src={frame} alt='realtime-video' />}
+            {frame && <img className={styles.camera} src={resultImage || frame} alt='realtime-video' />}
           </div>
         </div>
         <div className={styles.right}>
@@ -335,7 +357,9 @@ export default function App() {
           <button className={styles.control_button} onClick={handleCenterShoot}>원점</button>
           <button className={styles.control_button} onClick={handleCapture}>캡처</button>
           <button className={styles.control_button} onClick={handleValidation}>검증</button>
-          <button className={styles.control_button} onClick={handleTest}>테스트</button>
+          {/* <button className={styles.control_button} onClick={handleTest}>테스트</button> */}
+          <button className={styles.control_button} onClick={() => fileInputRef.current.click()}>업로드</button>
+          <input type='file' ref={fileInputRef} accept='image/*' style={{ display: 'none' }} onChange={handleUpload} />
         </div>
       </footer>
     </section>

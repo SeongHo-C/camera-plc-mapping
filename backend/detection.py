@@ -2,6 +2,8 @@ import torch
 import time
 import os
 import cv2
+import json
+import numpy as np
 from ultralytics import YOLO
 from depth.estimation import DepthEstimation
 from datetime import datetime
@@ -29,7 +31,7 @@ class Detection:
         results = self.model.track(
             source=frame,
             tracker='botsort.yaml',
-            conf=0.3,  # 검출 신뢰도 임계값. 높이면 오탐↓, 미탐↑
+            conf=0.2,  # 검출 신뢰도 임계값. 높이면 오탐↓, 미탐↑
             iou=0.5,  # NMS에서 겹침 허용치. 낮추면 중복↓, 높이면 중복↑
             persist=True,
             verbose=False
@@ -117,3 +119,26 @@ class Detection:
 
         cv2.imwrite(save_path, depth_vis)
         print(f'[{timestamp}] 깊이 맵 저장 완료: {filename}')
+
+    async def file_detect(self, websocket, file):
+        nparr = np.frombuffer(file, np.uint8)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+        results = self.model(
+            source=img,
+            conf=0.2,  # 검출 신뢰도 임계값. 높이면 오탐↓, 미탐↑
+            iou=0.5,  # NMS에서 겹침 허용치. 낮추면 중복↓, 높이면 중복↑
+            verbose=False
+        )
+
+        save_dir = 'data/captures/result_image'
+        os.makedirs(save_dir, exist_ok=True)
+
+        filename = datetime.now().strftime('%Y%m%d_%H%M%S') + '.jpg'
+        cv2.imwrite(os.path.join(save_dir, filename), results[0].plot())
+
+        _, buffer = cv2.imencode('.jpg', results[0].plot())
+        await websocket.send(json.dumps({'type': 'result', 'mimetype': 'image/jpeg'}))
+        await websocket.send(buffer.tobytes())
+
+        return True
