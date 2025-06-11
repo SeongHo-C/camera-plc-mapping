@@ -46,22 +46,26 @@ class Detection:
             # self.save_depth_image(depth_map)
 
             # depth_scale = self.depth_estimator.calibrate_depth_scale(depth_map, (100, 10, 140, 590))
-
-            self.control_shooting(detections, depth_frame)
+            # self.control_shooting(detections, depth_frame)
+            self.control_shooting(detections)
 
         return results[0].plot()
 
-    def control_shooting(self, detections, depth_frame):
+    # def control_shooting(self, detections, depth_frame):
+    def control_shooting(self, detections):
         if self.plc_controller.shoot_mode == 1:
-            self.process_shooting(detections, depth_frame)
+            # self.process_shooting(detections, depth_frame)
+            self.process_shooting(detections)
         elif self.plc_controller.laser_mode == 1:
             correction = self.plc_controller.laser_correction_value
-            self.process_shooting(detections, depth_frame, correction)
+            # self.process_shooting(detections, depth_frame, correction)
+            self.process_shooting(detections, correction)
 
-    def process_shooting(self, detections, depth_frame, correction_value=0):
+    # def process_shooting(self, detections, depth_frame, correction_value=0):
+    def process_shooting(self, detections, correction_value=0):
         current_time = time.time()
 
-        if current_time - self.last_shoot_time < 3:
+        if current_time - self.last_shoot_time < 2:
             return
 
         if any(d['cls_id'] == 3 for d in detections):
@@ -80,17 +84,19 @@ class Detection:
 
             [x_min, y_min, x_max, y_max] = target['bbox']
 
-            x_center = int((x_min + x_max) / 2)
-            y_center = int((y_min + y_max) / 2 + correction_value)
+            x_center = round((x_min + x_max) / 2)
+            y_center = round((y_min + y_max) / 2 + correction_value)
 
-            hornet_distance_cm = round(depth_frame.get_distance(x_center, y_center) * 100, 2)
+            # hornet_distance_cm = round(depth_frame.get_distance(x_center, y_center) * 100, 2)
 
-            self.plc_controller.manual_shoot('Pixel', x_center, y_center)
-            time.sleep(1)
-            self.plc_controller.manual_shoot('Pixel', x_center, y_center, hornet_distance_cm)
+            plc_x, plc_y = self.plc_controller.manual_shoot('Pixel', x_center, y_center)
+            # time.sleep(1)
+            # self.plc_controller.manual_shoot('Pixel', x_center, y_center, hornet_distance_cm)
 
             self.shoot_track_ids.add(target['track_id'])
             self.last_shoot_time = current_time
+
+            print(f'타겟 {target["track_id"]}: {plc_x}, {plc_y}')
 
     # def get_hornet_distance(self, depth_map, hornet_bbox, depth_scale):
     #     x_min, y_min, x_max, y_max = map(int, hornet_bbox)
