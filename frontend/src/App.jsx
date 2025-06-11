@@ -36,20 +36,20 @@ export default function App() {
 
   const handleContinuousShoot = () => {
     const corners = Object.values(corner);
-    const targets = Object.values(corner);
+    // const targets = Object.values(corner);
 
-    corners.forEach((_, idx) => {
-      const next = (idx + 1) % 4;
-      targets.splice(
-        2 * idx + 1, 0,
-        {
-          'x': (corners[idx].x + corners[next].x) / 2, 
-          'y': (corners[idx].y + corners[next].y) / 2
-        }
-      )
-    })
+    // corners.forEach((_, idx) => {
+    //   const next = (idx + 1) % 4;
+    //   targets.splice(
+    //     2 * idx + 1, 0,
+    //     {
+    //       'x': (corners[idx].x + corners[next].x) / 2, 
+    //       'y': (corners[idx].y + corners[next].y) / 2
+    //     }
+    //   )
+    // })
 
-    ws.send(JSON.stringify({ type: 'shoot', action: 'continuous', data: targets }));    
+    ws.send(JSON.stringify({ type: 'shoot', action: 'continuous', data: corners }));    
   }
 
   const handleCenterCoordinate = (e) => {
