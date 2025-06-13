@@ -10,7 +10,7 @@ from datetime import datetime
 
 
 class Detection:
-    def __init__(self, plc_controller, model_path='weights/detect11s.pt', output_dir='./saved_depth'):
+    def __init__(self, plc_controller, model_path='weights/detect11m.pt', output_dir='./saved_depth'):
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         print(f'device: {self.device}')
 
@@ -31,7 +31,7 @@ class Detection:
         results = self.model.track(
             source=frame,
             tracker='botsort.yaml',
-            conf=0.2,  # 검출 신뢰도 임계값. 높이면 오탐↓, 미탐↑
+            conf=0.3,  # 검출 신뢰도 임계값. 높이면 오탐↓, 미탐↑
             iou=0.5,  # NMS에서 겹침 허용치. 낮추면 중복↓, 높이면 중복↑
             persist=True,
             verbose=False
@@ -132,7 +132,7 @@ class Detection:
 
         results = self.model(
             source=img,
-            conf=0.2,  # 검출 신뢰도 임계값. 높이면 오탐↓, 미탐↑
+            conf=0.3,  # 검출 신뢰도 임계값. 높이면 오탐↓, 미탐↑
             iou=0.5,  # NMS에서 겹침 허용치. 낮추면 중복↓, 높이면 중복↑
             verbose=False
         )
