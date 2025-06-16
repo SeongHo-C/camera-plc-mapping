@@ -7,6 +7,7 @@ import numpy as np
 from ultralytics import YOLO
 from depth.estimation import DepthEstimation
 from datetime import datetime
+from collections import defaultdict
 
 
 class Detection:
@@ -26,6 +27,12 @@ class Detection:
 
         self.output_dir = output_dir
         os.makedirs(self.output_dir, exist_ok=True)
+
+        self.current_track_history = []
+        self.current_lowest_id = None
+        self.max_history_length = 30
+        self.last_detect_time = None
+        self.track_timeout = 1.0
 
     def detect(self, frame, depth_frame):
         results = self.model.track(
@@ -49,7 +56,17 @@ class Detection:
             # self.control_shooting(detections, depth_frame)
             self.control_shooting(detections)
 
-        return results[0].plot()
+        plotted_image = results[0].plot()
+
+        if not plotted_image.flags.writeable:
+            plotted_image = np.copy(plotted_image)
+            plotted_image = plotted_image.astype(np.uint8)
+
+        if len(self.current_track_history) > 1:
+            points = np.array(self.current_track_history, dtype=np.int32).reshape((-1, 1, 2))
+            cv2.polylines(plotted_image, [points], isClosed=False, color=(255, 255, 255), thickness=2)
+
+        return plotted_image
 
     # def control_shooting(self, detections, depth_frame):
     def control_shooting(self, detections):
@@ -65,9 +82,6 @@ class Detection:
     def process_shooting(self, detections, correction_value=0):
         current_time = time.time()
 
-        if current_time - self.last_shoot_time < 2:
-            return
-
         if any(d['cls_id'] == 3 for d in detections):
             print('안전 조치: 사람이 감지되어 사격을 중단합니다.')
             return
@@ -75,28 +89,47 @@ class Detection:
         valid_targets = [
             d for d in detections
             if d['cls_id'] in (0, 1)
-            and d['track_id'] not in self.shoot_track_ids
+            # and d['track_id'] not in self.shoot_track_ids
         ]
 
         if valid_targets:
             target = min(valid_targets, key=lambda x: x['track_id'])
             # hornet_distance_cm = self.get_hornet_distance(depth_map, target['bbox'], depth_scale)
 
-            [x_min, y_min, x_max, y_max] = target['bbox']
+            if self.current_lowest_id != target['track_id']:
+                self.current_track_history = []
 
+            self.current_lowest_id = target['track_id']
+            self.last_detect_time = current_time
+
+            [x_min, y_min, x_max, y_max] = target['bbox']
             x_center = round((x_min + x_max) / 2)
             y_center = round((y_min + y_max) / 2 + correction_value)
 
             # hornet_distance_cm = round(depth_frame.get_distance(x_center, y_center) * 100, 2)
 
+            self.current_track_history.append((x_center, y_center))
+
+            if len(self.current_track_history) > self.max_history_length:
+                self.current_track_history.pop(0)
+
+            if current_time - self.last_shoot_time < 1:
+                return
+
             plc_x, plc_y = self.plc_controller.manual_shoot('Pixel', x_center, y_center)
+            self.last_shoot_time = current_time
             # time.sleep(1)
             # self.plc_controller.manual_shoot('Pixel', x_center, y_center, hornet_distance_cm)
 
-            self.shoot_track_ids.add(target['track_id'])
-            self.last_shoot_time = current_time
+            # self.shoot_track_ids.add(target['track_id'])
 
             print(f'타겟 {target["track_id"]}: {plc_x}, {plc_y}')
+        else:
+            if self.last_detect_time and (current_time - self.last_detect_time < self.track_timeout):
+                pass
+            else:
+                self.current_track_history = []
+                self.current_lowest_id = None
 
     # def get_hornet_distance(self, depth_map, hornet_bbox, depth_scale):
     #     x_min, y_min, x_max, y_max = map(int, hornet_bbox)

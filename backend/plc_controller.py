@@ -102,10 +102,10 @@ class PlcController:
         # 임계값 1.0~5.0 사이에서 최적 값 실험
         H, status = cv2.findHomography(
             self.src_pts, self.dst_pts,
-            method=cv2.USAC_MAGSAC,
-            ransacReprojThreshold=3.0,
-            maxIters=2000,
-            confidence=0.99
+            method=cv2.LMEDS,
+            # ransacReprojThreshold=3.0,
+            # maxIters=2000,
+            confidence=0.999
         )
 
         # inliers_src = self.src_pts[status.ravel() == 1]
