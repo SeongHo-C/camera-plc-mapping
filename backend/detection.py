@@ -5,7 +5,7 @@ import cv2
 import json
 import numpy as np
 from ultralytics import YOLO
-from depth.estimation import DepthEstimation
+# from depth.estimation import DepthEstimation
 from datetime import datetime
 from collections import defaultdict
 
@@ -54,7 +54,17 @@ class Detection:
 
             # depth_scale = self.depth_estimator.calibrate_depth_scale(depth_map, (100, 10, 140, 590))
             # self.control_shooting(detections, depth_frame)
+
+            start_time = time.perf_counter()
             self.control_shooting(detections)
+            end_time = time.perf_counter()
+            total_response_time = (end_time - start_time) * 1000
+
+            print('-' * 50)
+            print(f'인식 시간 >>> {start_time:.6f}s')
+            print(f'발사 시간 >>> {end_time:.6f}s')
+            print(f'반응 시간 >>> {total_response_time:.2f}ms')
+            print('-' * 50)
 
         plotted_image = results[0].plot()
 
@@ -123,7 +133,7 @@ class Detection:
 
             # self.shoot_track_ids.add(target['track_id'])
 
-            print(f'타겟 {target["track_id"]}: {plc_x}, {plc_y}')
+            # print(f'타겟 {target["track_id"]}: {plc_x}, {plc_y}')
         else:
             if self.last_detect_time and (current_time - self.last_detect_time < self.track_timeout):
                 pass
@@ -146,18 +156,18 @@ class Detection:
             'track_id': int(box.id.item()) if box.id else None
         } for box in results.boxes]
 
-    def save_depth_image(self, depth_map, grayscale=True):
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
-        filename = f'depth_{timestamp}.jpg'
-        save_path = os.path.join(self.output_dir, filename)
+    # def save_depth_image(self, depth_map, grayscale=True):
+    #     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
+    #     filename = f'depth_{timestamp}.jpg'
+    #     save_path = os.path.join(self.output_dir, filename)
 
-        depth_vis = self.depth_estimator.visualize_depth(
-            depth_map,
-            grayscale=grayscale
-        )
+    #     depth_vis = self.depth_estimator.visualize_depth(
+    #         depth_map,
+    #         grayscale=grayscale
+    #     )
 
-        cv2.imwrite(save_path, depth_vis)
-        print(f'[{timestamp}] 깊이 맵 저장 완료: {filename}')
+    #     cv2.imwrite(save_path, depth_vis)
+    #     print(f'[{timestamp}] 깊이 맵 저장 완료: {filename}')
 
     async def file_detect(self, websocket, file):
         nparr = np.frombuffer(file, np.uint8)
