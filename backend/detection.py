@@ -49,22 +49,13 @@ class Detection:
         hornet_detected = any(d['cls_id'] in (0, 1) for d in detections)
 
         if hornet_detected:
+            print(f'인식 시간 >>> {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
             # depth_map = self.depth_estimator.estimate_depth(frame)
             # self.save_depth_image(depth_map)
 
             # depth_scale = self.depth_estimator.calibrate_depth_scale(depth_map, (100, 10, 140, 590))
             # self.control_shooting(detections, depth_frame)
-
-            start_time = time.perf_counter()
             self.control_shooting(detections)
-            end_time = time.perf_counter()
-            total_response_time = (end_time - start_time) * 1000
-
-            print('-' * 50)
-            print(f'인식 시간 >>> {start_time:.6f}s')
-            print(f'발사 시간 >>> {end_time:.6f}s')
-            print(f'반응 시간 >>> {total_response_time:.2f}ms')
-            print('-' * 50)
 
         plotted_image = results[0].plot()
 
@@ -128,6 +119,8 @@ class Detection:
 
             plc_x, plc_y = self.plc_controller.manual_shoot('Pixel', x_center, y_center)
             self.last_shoot_time = current_time
+
+            print(f'발사 시간 >>> {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
             # time.sleep(1)
             # self.plc_controller.manual_shoot('Pixel', x_center, y_center, hornet_distance_cm)
 
